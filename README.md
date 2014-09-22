@@ -25,3 +25,9 @@ There are few options that you can change by editing the file itself:
 	- HTML5 Drag'and'Drop (via dropzone.js)
 	- No Javascript HTML Form fallback
 - Upload using any compatible tool (like cURL)
+
+	This example will upload a file and copy URL to clipboard:
+	
+	```bash
+	curl -F "file=@$(pwd)/file.jpg" http://yoir-host/sharing/ > xclip -sel clip
+	```
