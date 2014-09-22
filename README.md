@@ -29,5 +29,5 @@ There are few options that you can change by editing the file itself:
 	This example will upload a file and copy URL to clipboard:
 	
 	```bash
-	curl -F "file=@$(pwd)/file.jpg" http://yoir-host/sharing/ > xclip -sel clip
+	curl -F "file=@$(pwd)/file.jpg" http://your-host/sharing/ > xclip -sel clip
 	```
