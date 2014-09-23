@@ -1,17 +1,42 @@
 <?php
-	$settings = array();
 
-	// Directory to store the uploaded files
-	$settings['uploaddir'] = '.';
 
-	// List uploaded files
-	$settings['listfiles'] = true;
+	// ============== Configuration begin  ==============
+
+	$settings = array(
+
+
+		// Directory to store uploaded files
+		uploaddir => '.',
+
+
+		// Display list uploaded files
+		listfiles => true,
+
+
+		// Display debugging information
+		debug => false
+
+	);
+
+	// ============== Configuration end  ==============
 
 	// Relative path to this file (don't edit)
 	$settings['scriptpath'] = $_SERVER['PHP_SELF'];
 
 	// Name of this file (don't edit)
 	$settings['scriptname'] = pathinfo(__FILE__, PATHINFO_FILENAME) . '.php';
+
+	// URL to upload page
+	$settings['pageurl'] = $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['REQUEST_URI']), '\\/');
+
+	// Displaying debug information
+	if ($settings['debug']) {
+		echo '<h1>Debugging information</h1>';
+		echo '<pre>';
+		print_r($settings);
+		echo '</pre>';
+	}
 
 	if (isset($_FILES['file']) && strlen($_FILES['file']['name']) > 1) {
 		$upload_file_name = basename($_FILES['file']['name']);

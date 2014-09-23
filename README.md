@@ -12,22 +12,25 @@ Just drop a PHP file in any directory. It will work straight away
 
 There are few options that you can change by editing the file itself:
 
-- `$settings['uploaddir'] = '.';`
+- `uploaddir => '.'`
 	Directory to store the uploaded files. Defaults to rurrect script directory
 
-- `$settings['listfiles'] = true;`
+- `listfiles => true`
 	Option that will list all files in uploads directory. Enabled by default
+
+- `debug => false`
+	To display debugging information
 
 ## Usage options
 
 - Through interface:
-	- Click on upload message
-	- HTML5 Drag'and'Drop (via dropzone.js)
-	- No Javascript HTML Form fallback
+	- Choose files via dialigue
+	- Drop files, via HTML5 drag'and'drop (using [dropzone.js](http://www.dropzonejs.com/))
+	- Basic HTML Form (if no JavaScript is suported)
 - Upload using any compatible tool (like cURL)
 
 	This example will upload a file and copy URL to clipboard:
-	
+
 	```bash
-	curl -F "file=@$(pwd)/file.jpg" http://your-host/sharing/ > xclip -sel clip
+	curl -F "file=@file.jpg" your-host/sharing/ | xclip -sel clip
 	```
