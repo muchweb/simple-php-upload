@@ -317,7 +317,7 @@
 				<?php
 					$dh = opendir($settings['uploaddir']);
 					while (false !== ($filename = readdir($dh)))
-						if (!in_array($filename, array('.', '..', $data['scriptname']))) {
+						if (is_file($filename) && !in_array($filename, array('.', '..', $data['scriptname']))) {
 							$file_info = array();
 
 							if ($settings['listfiles_size'])
