@@ -31,6 +31,10 @@
 		listfiles_size => true,
 
 
+		// Display file dates
+		listfiles_date => true,
+
+
 		// Randomize file names (number of 'false')
 		random_name_len => 10,
 
@@ -76,7 +80,7 @@
 		echo '</pre>';
 	}
 
-	function FormatSize ($bytes, $precision = 2) {
+	function FormatSize ($bytes) {
 		$units = array('B', 'KB', 'MB', 'GB', 'TB');
 
 		$bytes = max($bytes, 0);
@@ -85,7 +89,7 @@
 
 		$bytes /= pow(1024, $pow);
 
-		return round($bytes, $precision) . ' ' . $units[$pow];
+		return ceil($bytes) . ' ' . $units[$pow];
 	}
 
 
@@ -310,12 +314,20 @@
 					$dh = opendir($settings['uploaddir']);
 					while (false !== ($filename = readdir($dh)))
 						if (!in_array($filename, array('.', '..', $data['scriptname']))) {
-							$size = '';
+							$file_info = array();
 
 							if ($settings['listfiles_size'])
-								$size = '(' . FormatSize(filesize($filename)) . ')';
+								$file_info[] = FormatSize(filesize($filename));
 
-							echo "<li><a href=\"$filename\">$filename $size</a></li>";
+							if ($settings['listfiles_size'])
+								$file_info[] = date ('F d Y H:i:s.', filemtime($filename));
+
+							$file_info = implode(',', $file_info);
+
+							if (strlen($file_info) > 0)
+								$file_info = '(' . $file_info . ')';
+
+							echo "<li><a href=\"$filename\">$filename $file_info</a></li>";
 						}
 				?>
 			</ul>
