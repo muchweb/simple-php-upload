@@ -1,4 +1,7 @@
 <?php
+    error_reporting(E_ALL);
+    error_reporting(1);
+
 	/*
 		This program is free software: you can redistribute it and/or modify
 		it under the terms of the GNU General Public License as published by
@@ -249,16 +252,16 @@
 				<input type="submit" value="Upload" />
 			</div>
 		</form>
-		<? if ($settings['listfiles']) { ?>
+		<?php if ($settings['listfiles']) { ?>
 			<strong>Uploaded files:</strong><br />
 			<ul>
-				<?
+				<?php
 					$dh = opendir($settings['uploaddir']);
 					while (false !== ($filename = readdir($dh)))
 						if (!in_array($filename, array('.', '..', $settings['scriptname'])))
 							echo "<li><a href=\"$filename\">$filename</a></li>";
 				?>
 			</ul>
-		<? } ?>
+		<?php } ?>
 	</body>
 </html>
