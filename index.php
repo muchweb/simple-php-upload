@@ -1,7 +1,4 @@
 <?php
-    error_reporting(E_ALL);
-    error_reporting(1);
-
 	/*
 		This program is free software: you can redistribute it and/or modify
 		it under the terms of the GNU General Public License as published by
@@ -30,41 +27,72 @@
 		listfiles => true,
 
 
+		// Randomize file names
+		random_name_len => false,
+
+
+		// Random file name letters
+		random_name_alphabet => 'qwertyuiodfgjkcvbnm',
+
+
 		// Display debugging information
-		debug => false
+		debug => true
 
 	);
 
 	// ============== Configuration end  ==============
 
-	// Relative path to this file (don't edit)
-	$settings['scriptpath'] = $_SERVER['PHP_SELF'];
+    $data = array();
 
-	// Name of this file (don't edit)
-	$settings['scriptname'] = pathinfo(__FILE__, PATHINFO_FILENAME) . '.php';
+	// Name of this file
+	$data['scriptname'] = pathinfo(__FILE__, PATHINFO_BASENAME);
 
 	// URL to upload page
-	$settings['pageurl'] = $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['REQUEST_URI']), '\\/');
+	$data['pageurl'] = "http" . (($_SERVER['SERVER_PORT']==443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . '/';
 
-	// Displaying debug information
 	if ($settings['debug']) {
-		echo '<h1>Debugging information</h1>';
+        // Enabling error reporting
+        error_reporting(E_ALL);
+        error_reporting(1);
+
+        // Displaying debug information
+		echo '<h1>Debugging information: settings</h1>';
 		echo '<pre>';
 		print_r($settings);
+		echo '</pre>';
+
+        // Displaying debug information
+		echo '<h1>Debugging information: data</h1>';
+		echo '<pre>';
+		print_r($data);
 		echo '</pre>';
 	}
 
 	if (isset($_FILES['file']) && strlen($_FILES['file']['name']) > 1) {
-		$upload_file_name = basename($_FILES['file']['name']);
-		$uploadpath = $settings['uploaddir'] . DIRECTORY_SEPARATOR . $upload_file_name;
-		$page_url = $_SERVER['HTTP_HOST'].rtrim(dirname($_SERVER['REQUEST_URI']), '\\/');
+		$data['uploaded_file_name'] = basename($_FILES['file']['name']);
+		$data['target_file_name'] = $data['uploaded_file_name'];
+        if ($settings['random_name_len'] !== false) {
+            $data['target_file_name'] = '';
+            while (strlen($data['target_file_name']) < $settings['random_name_len'])
+                $data['target_file_name'] .= $settings['random_name_alphabet'][rand(0, count($settings['random_name_alphabet']) - 1)];
+        }
+		$data['upload_target_file'] = $settings['uploaddir'] . DIRECTORY_SEPARATOR . $data['target_file_name'];
+		$data['tmp_name'] = $_FILES['file']['tmp_name'];
 
-		if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadpath)) {
-			echo 'http://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['REQUEST_URI']), '\\/') . '/' . $uploadpath;
+    	if ($settings['debug']) {
+            // Displaying debug information
+    		echo '<h1>Debugging information: data</h1>';
+    		echo '<pre>';
+    		print_r($data);
+    		echo '</pre>';
+    	}
+
+		if (move_uploaded_file($data['tmp_name'], $data['upload_target_file'])) {
+			echo $data['pageurl'] .  $data['upload_target_file'];
 			exit;
-			// echo 'File: <b>' . $upload_file_name . '</b> successfully uploaded:<br />';
+			// echo 'File: <b>' . $data['uploaded_file_name'] . '</b> successfully uploaded:<br />';
 			// echo 'Size: <b>'. number_format($_FILES['file']['size'] / 1024, 3, '.', '') .'KB</b><br />';
-			// echo 'File /URL: <b><a href="http://'.$_SERVER['HTTP_HOST'].rtrim(dirname($_SERVER['REQUEST_URI']), '\\/').'/'.$uploadpath.'">http://'.$_SERVER['HTTP_HOST'].rtrim(dirname($_SERVER['REQUEST_URI']), '\\/').'/'.$uploadpath.'</a></b>';
+			// echo 'File /URL: <b><a href="http://'.$_SERVER['HTTP_HOST'].rtrim(dirname($_SERVER['REQUEST_URI']), '\\/').'/'.$data['upload_target_file'].'">http://'.$_SERVER['HTTP_HOST'].rtrim(dirname($_SERVER['REQUEST_URI']), '\\/').'/'.$data['upload_target_file'].'</a></b>';
 		} else {
 			echo 'Error: unable to upload the file.';
 			exit;
@@ -246,7 +274,7 @@
 		</style>
 	</head>
 	<body>
-		<form action="<?= $settings['scriptpath'] ?>" method="POST" enctype="multipart/form-data" class="dropzone" id="my-awesome-dropzone">
+		<form action="<?= $data['scriptname'] ?>" method="POST" enctype="multipart/form-data" class="dropzone" id="my-awesome-dropzone">
 			<div class="fallback">
 				Choose File: <input type="file" name="file" /><br />
 				<input type="submit" value="Upload" />
@@ -258,7 +286,7 @@
 				<?php
 					$dh = opendir($settings['uploaddir']);
 					while (false !== ($filename = readdir($dh)))
-						if (!in_array($filename, array('.', '..', $settings['scriptname'])))
+						if (!in_array($filename, array('.', '..', $data['scriptname'])))
 							echo "<li><a href=\"$filename\">$filename</a></li>";
 				?>
 			</ul>
