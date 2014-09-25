@@ -27,6 +27,10 @@
 		listfiles => true,
 
 
+		// Display file sizes
+		listfiles_size => true,
+
+
 		// Randomize file names (number of 'false')
 		random_name_len => 10,
 
@@ -71,6 +75,19 @@
 		print_r($data);
 		echo '</pre>';
 	}
+
+	function FormatSize ($bytes, $precision = 2) {
+		$units = array('B', 'KB', 'MB', 'GB', 'TB');
+
+		$bytes = max($bytes, 0);
+		$pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+		$pow = min($pow, count($units) - 1);
+
+		$bytes /= pow(1024, $pow);
+
+		return round($bytes, $precision) . ' ' . $units[$pow];
+	}
+
 
 	if (isset($_FILES['file']) && strlen($_FILES['file']['name']) > 1) {
 		$data['uploaded_file_name'] = basename($_FILES['file']['name']);
@@ -292,8 +309,14 @@
 				<?php
 					$dh = opendir($settings['uploaddir']);
 					while (false !== ($filename = readdir($dh)))
-						if (!in_array($filename, array('.', '..', $data['scriptname'])))
-							echo "<li><a href=\"$filename\">$filename</a></li>";
+						if (!in_array($filename, array('.', '..', $data['scriptname']))) {
+							$size = '';
+
+							if ($settings['listfiles_size'])
+								$size = '(' . FormatSize(filesize($filename)) . ')';
+
+							echo "<li><a href=\"$filename\">$filename $size</a></li>";
+						}
 				?>
 			</ul>
 		<?php } ?>
