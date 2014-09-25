@@ -35,6 +35,10 @@
 		listfiles_date => true,
 
 
+		// Display file dates format
+		listfiles_date_format => 'F d Y H:i:s',
+
+
 		// Randomize file names (number of 'false')
 		random_name_len => 10,
 
@@ -320,7 +324,7 @@
 								$file_info[] = FormatSize(filesize($filename));
 
 							if ($settings['listfiles_size'])
-								$file_info[] = date ('F d Y H:i:s.', filemtime($filename));
+								$file_info[] = date ($settings['listfiles_date_format'], filemtime($filename));
 
 							$file_info = implode(', ', $file_info);
 
