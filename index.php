@@ -27,8 +27,12 @@
 		listfiles => true,
 
 
-		// Randomize file names
-		random_name_len => false,
+		// Randomize file names (number of 'false')
+		random_name_len => 10,
+
+
+		// Keep filetype information (if random name is activated)
+		random_name_keep_type => true,
 
 
 		// Random file name letters
@@ -48,7 +52,7 @@
 	$data['scriptname'] = pathinfo(__FILE__, PATHINFO_BASENAME);
 
 	// URL to upload page
-	$data['pageurl'] = "http" . (($_SERVER['SERVER_PORT']==443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . '/';
+	$data['pageurl'] = "http" . (($_SERVER['SERVER_PORT']==443) ? "s://" : "://") . $_SERVER['SERVER_NAME'] . dirname($_SERVER['REQUEST_URI']) . '/';
 
 	if ($settings['debug']) {
         // Enabling error reporting
@@ -74,7 +78,9 @@
         if ($settings['random_name_len'] !== false) {
             $data['target_file_name'] = '';
             while (strlen($data['target_file_name']) < $settings['random_name_len'])
-                $data['target_file_name'] .= $settings['random_name_alphabet'][rand(0, count($settings['random_name_alphabet']) - 1)];
+                $data['target_file_name'] .= $settings['random_name_alphabet'][rand(0, strlen($settings['random_name_alphabet']) - 1)];
+			if ($settings['random_name_keep_type'])
+				$data['target_file_name'] .= '.' . pathinfo($data['uploaded_file_name'], PATHINFO_EXTENSION);
         }
 		$data['upload_target_file'] = $settings['uploaddir'] . DIRECTORY_SEPARATOR . $data['target_file_name'];
 		$data['tmp_name'] = $_FILES['file']['tmp_name'];
