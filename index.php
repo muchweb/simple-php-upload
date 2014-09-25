@@ -48,7 +48,7 @@
 
 
 		// Display debugging information
-		debug => true
+		debug => false
 
 	);
 
@@ -322,12 +322,12 @@
 							if ($settings['listfiles_size'])
 								$file_info[] = date ('F d Y H:i:s.', filemtime($filename));
 
-							$file_info = implode(',', $file_info);
+							$file_info = implode(', ', $file_info);
 
 							if (strlen($file_info) > 0)
-								$file_info = '(' . $file_info . ')';
+								$file_info = ' (' . $file_info . ')';
 
-							echo "<li><a href=\"$filename\">$filename $file_info</a></li>";
+							echo "<li><a href=\"$filename\">$filename</a>$file_info</li>";
 						}
 				?>
 			</ul>
