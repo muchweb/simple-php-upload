@@ -18,41 +18,32 @@
 
 	$settings = array(
 
-
 		// Directory to store uploaded files
 		uploaddir => '.',
-
 
 		// Display list uploaded files
 		listfiles => true,
 
-
 		// Display file sizes
 		listfiles_size => true,
-
 
 		// Display file dates
 		listfiles_date => true,
 
-
 		// Display file dates format
 		listfiles_date_format => 'F d Y H:i:s',
 
-
 		// Randomize file names (number of 'false')
-		random_name_len => 10,
-
+		random_name_len => 4,
 
 		// Keep filetype information (if random name is activated)
 		random_name_keep_type => true,
 
-
 		// Random file name letters
-		random_name_alphabet => 'qwertyuiodfgjkcvbnm',
-
+		random_name_alphabet => 'qwertyuiopasdfghjklzxcvbnm',
 
 		// Display debugging information
-		debug => $_SERVER['SERVER_NAME'] === 'localhost'
+		debug => ($_SERVER['SERVER_NAME'] === 'localhost')
 
 	);
 
@@ -78,13 +69,13 @@
         error_reporting(1);
 
         // Displaying debug information
-		echo '<h1>Debugging information: settings</h1>';
+		echo '<h2>Debugging information: settings</h2>';
 		echo '<pre>';
 		print_r($settings);
 		echo '</pre>';
 
         // Displaying debug information
-		echo '<h1>Debugging information: data</h1>';
+		echo '<h2>Debugging information: data</h2>';
 		echo '<pre>';
 		print_r($data);
 		echo '</pre>';
@@ -107,18 +98,20 @@
 		$data['uploaded_file_name'] = basename($_FILES['file']['name']);
 		$data['target_file_name'] = $data['uploaded_file_name'];
         if ($settings['random_name_len'] !== false) {
-            $data['target_file_name'] = '';
-            while (strlen($data['target_file_name']) < $settings['random_name_len'])
-                $data['target_file_name'] .= $settings['random_name_alphabet'][rand(0, strlen($settings['random_name_alphabet']) - 1)];
-			if ($settings['random_name_keep_type'])
-				$data['target_file_name'] .= '.' . pathinfo($data['uploaded_file_name'], PATHINFO_EXTENSION);
+			do {
+	            $data['target_file_name'] = '';
+	            while (strlen($data['target_file_name']) < $settings['random_name_len'])
+	                $data['target_file_name'] .= $settings['random_name_alphabet'][rand(0, strlen($settings['random_name_alphabet']) - 1)];
+				if ($settings['random_name_keep_type'])
+					$data['target_file_name'] .= '.' . pathinfo($data['uploaded_file_name'], PATHINFO_EXTENSION);
+			} while (file_exists($data['target_file_name']))
         }
 		$data['upload_target_file'] = $data['uploaddir'] . DIRECTORY_SEPARATOR . $data['target_file_name'];
 		$data['tmp_name'] = $_FILES['file']['tmp_name'];
 
     	if ($settings['debug']) {
             // Displaying debug information
-    		echo '<h1>Debugging information: data</h1>';
+    		echo '<h2>Debugging information: data</h2>';
     		echo '<pre>';
     		print_r($data);
     		echo '</pre>';
