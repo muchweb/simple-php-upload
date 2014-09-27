@@ -13,51 +13,46 @@ Just drop a PHP file in any directory. It will work straight away
 There are few options that you can change by editing the file itself:
 
 
-- `uploaddir` => `'.'`
-	Directory to store uploaded files
 
+- Directory to store uploaded files
 
-- `listfiles` => `true`
-	Display list uploaded files
+	`uploaddir` => `'.'`
 
+- Display list uploaded files
 
-- `listfiles_size` => `true`
-	Display file sizes
+	`listfiles` => `true`
 
+- Allow users to delete files that they have uploaded (will enable sessions)
 
-- `listfiles_date` => `true`
-	Display file dates
+	`allow_deletion` => `true`
 
+- Display file sizes
 
-- `listfiles_date_format` => `'F d Y H:i:s'`
-	Display file dates format
+	`listfiles_size` => `true`
 
+- Display file dates
 
-- `random_name_len` => `10`
-	Randomize file names (number of 'false')
+	`listfiles_date` => `true`
 
+- Display file dates format
 
-- `random_name_keep_type` => `true`
-	Keep filetype information (if random name is activated)
+	`listfiles_date_format` => `'F d Y H:i:s'`
 
+- Randomize file names (number of 'false')
 
-- `random_name_alphabet` => `'qwertyuiodfgjkcvbnm'`
-	Random file name letters
+	`random_name_len` => `4`
 
+- Keep filetype information (if random name is activated)
 
-- `debug` => `false`
-	Display debugging information
+	`random_name_keep_type` => `true`
 
+- Random file name letters
 
+	`random_name_alphabet` => `'qwertyuiopasdfghjklzxcvbnm'`
 
-- `uploaddir => '.'`
-	Directory to store the uploaded files. Defaults to rurrect script directory
+- Display debugging information
 
-- `listfiles => true`
-	Option that will list all files in uploads directory. Enabled by default
-
-- `debug => false`
-	To display debugging information
+	`debug` => `($_SERVER['SERVER_NAME'] === 'localhost')`
 
 ## Usage options
 
