@@ -52,7 +52,7 @@
 
 
 		// Display debugging information
-		debug => false
+		debug => $_SERVER['SERVER_NAME'] === 'localhost'
 
 	);
 
@@ -65,6 +65,12 @@
 
 	// URL to upload page
 	$data['pageurl'] = "http" . (($_SERVER['SERVER_PORT']==443) ? "s://" : "://") . $_SERVER['SERVER_NAME'] . dirname($_SERVER['REQUEST_URI']) . '/';
+
+	// Use canonized path
+	$data['uploaddir'] = realpath($settings['uploaddir']);
+
+	// Maximum upload size, set by system
+	$data['max_upload_size'] = ini_get('upload_max_filesize');
 
 	if ($settings['debug']) {
         // Enabling error reporting
@@ -107,7 +113,7 @@
 			if ($settings['random_name_keep_type'])
 				$data['target_file_name'] .= '.' . pathinfo($data['uploaded_file_name'], PATHINFO_EXTENSION);
         }
-		$data['upload_target_file'] = $settings['uploaddir'] . DIRECTORY_SEPARATOR . $data['target_file_name'];
+		$data['upload_target_file'] = $data['uploaddir'] . DIRECTORY_SEPARATOR . $data['target_file_name'];
 		$data['tmp_name'] = $_FILES['file']['tmp_name'];
 
     	if ($settings['debug']) {
@@ -305,6 +311,10 @@
 		</style>
 	</head>
 	<body>
+		<h1>Simple PHP Upload</h1>
+		<p>
+			Maximum upload size: <?php echo $data['max_upload_size']; ?>
+		</p>
 		<form action="<?= $data['scriptname'] ?>" method="POST" enctype="multipart/form-data" class="dropzone" id="my-awesome-dropzone">
 			<div class="fallback">
 				Choose File: <input type="file" name="file" /><br />
