@@ -52,7 +52,7 @@
 
 	// ============== Configuration end  ==============
 
-    $data = array();
+	$data = array();
 
 	// Name of this file
 	$data['scriptname'] = pathinfo(__FILE__, PATHINFO_BASENAME);
@@ -77,24 +77,26 @@
 	}
 
 	if ($settings['debug']) {
-        // Enabling error reporting
-        error_reporting(E_ALL);
-        error_reporting(1);
 
-        // Displaying debug information
+
+		// Enabling error reporting
+		error_reporting(E_ALL);
+		error_reporting(1);
+
+		// Displaying debug information
 		echo '<h2>Debugging information: settings</h2>';
 		echo '<pre>';
 		print_r($settings);
 		echo '</pre>';
 
-        // Displaying debug information
+		// Displaying debug information
 		echo '<h2>Debugging information: data</h2>';
 		echo '<pre>';
 		print_r($data);
 		echo '</pre>';
 		echo '</pre>';
 
-        // Displaying debug information
+		// Displaying debug information
 		echo '<h2>Debugging information: _SESSION</h2>';
 		echo '<pre>';
 		print_r($_SESSION);
@@ -113,12 +115,12 @@
 		return ceil($bytes) . ' ' . $units[$pow];
 	}
 
-	function diverse_array ($vector) {
-	    $result = array();
-	    foreach($vector as $key1 => $value1)
-	        foreach($value1 as $key2 => $value2)
-	            $result[$key2][$key1] = $value2;
-	    return $result;
+	function DiverseArray ($vector) {
+		$result = array();
+		foreach($vector as $key1 => $value1)
+			foreach($value1 as $key2 => $value2)
+				$result[$key2][$key1] = $value2;
+		return $result;
 	}
 
 	function UploadFile ($file_data) {
@@ -128,22 +130,27 @@
 
 		$data['uploaded_file_name'] = basename($file_data['name']);
 		$data['target_file_name'] = $file_data['uploaded_file_name'];
-        if ($settings['random_name_len'] !== false) {
+		if ($settings['random_name_len'] !== false) {
 			do {
-	            $data['target_file_name'] = '';
-	            while (strlen($data['target_file_name']) < $settings['random_name_len'])
-	                $data['target_file_name'] .= $settings['random_name_alphabet'][rand(0, strlen($settings['random_name_alphabet']) - 1)];
+				$data['target_file_name'] = '';
+				while (strlen($data['target_file_name']) < $settings['random_name_len'])
+					$data['target_file_name'] .= $settings['random_name_alphabet'][rand(0, strlen($settings['random_name_alphabet']) - 1)];
 				if ($settings['random_name_keep_type'])
 					$data['target_file_name'] .= '.' . pathinfo($data['uploaded_file_name'], PATHINFO_EXTENSION);
 			} while (file_exists($data['target_file_name']));
-        }
+		}
 		$data['upload_target_file'] = $data['uploaddir'] . DIRECTORY_SEPARATOR . $data['target_file_name'];
 		$data['tmp_name'] = $file_data['tmp_name'];
 
+		if (file_exists($data['upload_target_file'])) {
+			echo 'File name already exists' . "\n";
+			return;
+		}
 
-    		echo '<pre>';
-    		print_r($data);
-    		echo '</pre>';
+
+		echo '<pre>';
+		print_r($data);
+		echo '</pre>';
 
 
 		if (move_uploaded_file($data['tmp_name'], $data['upload_target_file'])) {
@@ -159,21 +166,21 @@
 	}
 
 	if (isset($_FILES['file'])) {
-    	if ($settings['debug']) {
-            // Displaying debug information
-    		echo '<h2>Debugging information: data</h2>';
-    		echo '<pre>';
-    		print_r($data);
-    		echo '</pre>';
-            // Displaying debug information
-    		echo '<h2>Debugging information: file</h2>';
-    		echo '<pre>';
-    		print_r($_FILES);
-    		echo '</pre>';
-    	}
+		if ($settings['debug']) {
+			// Displaying debug information
+			echo '<h2>Debugging information: data</h2>';
+			echo '<pre>';
+			print_r($data);
+			echo '</pre>';
+			// Displaying debug information
+			echo '<h2>Debugging information: file</h2>';
+			echo '<pre>';
+			print_r($_FILES);
+			echo '</pre>';
+		}
 
 		if (is_array($_FILES['file'])) {
-			$file_array = diverse_array($_FILES['file']);
+			$file_array = DiverseArray($_FILES['file']);
 			foreach ($file_array as $file_data)
 				UploadFile($file_data);
 		} else
