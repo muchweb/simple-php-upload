@@ -2,7 +2,7 @@
 
 Simple single-file PHP file upload (file share hosting) script.
 
-> :warning: **Security warning**: There is no limit on file size or file type. Please make sure that file permissions are set right so nobody can execute uploaded executables. Or exscape your desired directory!
+> :warning: **Security warning**: There is no limit on file size or file type. Please make sure that file permissions are set right so nobody can execute uploaded executables. Or exscape your desired directory! Please skip to server configuration for examples.
 
 ## Installation
 
@@ -67,3 +67,32 @@ There are few options that you can change by editing the file itself:
 	```bash
 	curl -F "file=@file.jpg" your-host/sharing/ | xclip -sel clip
 	```
+
+## Server configuration
+
+Do not allow uploaded code execution!
+
+### NGINX configuration example
+
+	server {
+		listen 80 default_server;
+		listen [::]:80 default_server ipv6only=on;
+
+		root /usr/share/nginx;
+		index index.php;
+
+		server_name localhost;
+
+		location / {
+			try_files $uri $uri/ =404;
+		}
+
+		error_page 404 /index.php;
+
+		location /index.php {
+			fastcgi_split_path_info ^(.+\.php)(/.+)$;
+			fastcgi_pass unix:/var/run/php5-fpm.sock;
+			fastcgi_index index.php;
+			include fastcgi_params;
+		}
+	}
