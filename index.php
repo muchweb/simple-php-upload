@@ -37,13 +37,13 @@
 		listfiles_date_format => 'F d Y H:i:s',
 
 		// Randomize file names (number of 'false')
-		random_name_len => 4,
+		random_name_len => 8,
 
 		// Keep filetype information (if random name is activated)
 		random_name_keep_type => true,
 
 		// Random file name letters
-		random_name_alphabet => 'qwertyuiopasdfghjklzxcvbnm',
+		random_name_alphabet => 'qazwsxedcrfvtgbyhnujmikolp1234567890',
 
 		// Display debugging information
 		debug => ($_SERVER['SERVER_NAME'] === 'localhost')
