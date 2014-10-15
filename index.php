@@ -205,6 +205,69 @@
 	<head>
 		<meta charset="utf-8">
 		<title>strace.club</title>
+		<style media="screen">
+			body {
+				background: #111;
+				margin: 0;
+				color: #ddd;
+				font-family: sans-serif;
+			}
+
+			h1 {
+				display: block;
+				background: rgba(255, 255, 255, 0.05);
+				padding: 8px 16px;
+				text-align: center;
+				margin: 0;
+			}
+
+			form {
+				display: block;
+				background: rgba(255, 255, 255, 0.075);
+				padding: 16px 16px;
+				margin: 0;
+			}
+
+			p {
+				display: block;
+				background: rgba(255, 255, 255, 0.075);
+				padding: 4px 16px;
+				margin: 16px 0 0 0;
+				text-align: center;
+			}
+
+			ul {
+				display: block;
+				margin: 0;
+				padding: 0;
+			}
+
+			ul > li {
+				display: block;
+				margin: 0;
+				padding: 0;
+			}
+
+			ul > li > a {
+				display: block;
+				margin: 0 0 1px 0;
+				list-style: none;
+				background: rgba(255, 255, 255, 0.1);
+				padding: 8px 16px;
+				text-decoration: none;
+				color: inherit;
+				opacity: 0.5;
+			}
+
+			ul > li > a > span {
+				float: right;
+				font-size: 90%;
+			}
+
+			ul > li > a:hover {
+				opacity: 1;
+			}
+		</style>
 	</head>
 	<body>
 		<h1>strace.club</h1>
