@@ -271,9 +271,9 @@
 	</head>
 	<body>
 		<h1>strace.club</h1>
-		<form action="<?= $data['scriptname'] ?>" method="POST" enctype="multipart/form-data" class="dropzone" id="my-awesome-dropzone">
+		<form action="<?= $data['scriptname'] ?>" method="POST" enctype="multipart/form-data" class="dropzone" id="simpleupload-form">
 			Maximum upload size: <?php echo $data['max_upload_size']; ?><br />
-			<input type="file" name="file[]" multiple required onchange="formname.submit();" />
+			<input type="file" name="file[]" multiple required id="simpleupload-input"/>
 		</form>
 		<?php if ($settings['listfiles']) { ?>
 			<p>Uploaded files:</p>
@@ -304,5 +304,10 @@
 			</ul>
 		<?php } ?>
 		<a href="https://github.com/muchweb/simple-php-upload"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+		<script charset="utf-8">
+			document.getElementById('simpleupload-input').onchange = function() {
+				document.getElementById('simpleupload-form').submit();
+			};
+		</script>
 	</body>
 </html>
