@@ -46,7 +46,10 @@
 		random_name_alphabet => 'qazwsxedcrfvtgbyhnujmikolp1234567890',
 
 		// Display debugging information
-		debug => ($_SERVER['SERVER_NAME'] === 'localhost')
+		debug => false,
+
+		// Complete URL to your directory (including tracing slash)
+		url => 'http://strace.club/',
 
 	);
 
@@ -56,9 +59,6 @@
 
 	// Name of this file
 	$data['scriptname'] = pathinfo(__FILE__, PATHINFO_BASENAME);
-
-	// URL to upload page
-	$data['pageurl'] = "http" . (($_SERVER['SERVER_PORT']==443) ? "s://" : "://") . $_SERVER['SERVER_NAME'] . dirname($_SERVER['REQUEST_URI']) . '/';
 
 	// Use canonized path
 	$data['uploaddir'] = realpath($settings['uploaddir']);
@@ -147,19 +147,10 @@
 			return;
 		}
 
-
-		echo '<pre>';
-		print_r($data);
-		echo '</pre>';
-
-
 		if (move_uploaded_file($data['tmp_name'], $data['upload_target_file'])) {
 			if ($settings['allow_deletion'])
 				$_SESSION['upload_user_files'][] = $data['target_file_name'];
-			echo $data['pageurl'] .  $data['upload_target_file'] . "\n";
-			// echo 'File: <b>' . $data['uploaded_file_name'] . '</b> successfully uploaded:<br />';
-			// echo 'Size: <b>'. number_format($_FILES['file']['size'] / 1024, 3, '.', '') .'KB</b><br />';
-			// echo 'File /URL: <b><a href="http://'.$_SERVER['HTTP_HOST'].rtrim(dirname($_SERVER['REQUEST_URI']), '\\/').'/'.$data['upload_target_file'].'">http://'.$_SERVER['HTTP_HOST'].rtrim(dirname($_SERVER['REQUEST_URI']), '\\/').'/'.$data['upload_target_file'].'</a></b>';
+			echo $settings['url'] .  $data['target_file_name'] . "\n";
 		} else {
 			echo 'Error: unable to upload the file.';
 		}
