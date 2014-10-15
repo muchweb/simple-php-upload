@@ -246,20 +246,23 @@
 				background: rgba(255, 255, 255, 0.075);
 				padding: 16px 16px;
 				margin: 0;
+				text-align: center;
 			}
 
 			body > p {
 				display: block;
 				background: rgba(255, 255, 255, 0.075);
 				padding: 4px 16px;
-				margin: 16px 0 0 0;
 				text-align: center;
+				max-width: 1000px;
+				margin: 16px auto 0 auto;
 			}
 
 			body > ul {
 				display: block;
-				margin: 0;
 				padding: 0;
+				max-width: 1000px;
+				margin: 0 auto;
 			}
 
 			body > ul > li {
