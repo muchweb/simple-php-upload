@@ -4,6 +4,14 @@ Simple single-file PHP file upload (file share hosting) script.
 
 > :warning: **Security warning**: There is no limit on file size or file type. Please make sure that file permissions are set right so nobody can execute uploaded executables. Or exscape your desired directory! Please skip to server configuration for examples.
 
+## TODO
+
+- [x] Delete files
+- [x] Private files
+- [x] Sort by age
+- [ ] Auto-remove old files
+- [ ] AJAX Uploader
+
 ## Installation
 
 Just drop a PHP file in any directory. It will work straight away
@@ -11,7 +19,6 @@ Just drop a PHP file in any directory. It will work straight away
 ## Configuration
 
 There are few options that you can change by editing the file itself:
-
 
 
 - Directory to store uploaded files
@@ -65,7 +72,7 @@ There are few options that you can change by editing the file itself:
 	This example will upload a file and copy URL to clipboard:
 
 	```bash
-	curl -F "file=@file.jpg" your-host/sharing/ | xclip -sel clip
+	curl -F "file[]=@file.jpg" strace.club | xclip -sel clip
 	```
 
 ## Server configuration
