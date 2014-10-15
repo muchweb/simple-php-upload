@@ -188,49 +188,55 @@
 						echo 'File has been removed';
 						exit;
 					}
+
+	function ListFiles ($dir, $exclude) {
+		$file_array = array();
+		$dh = opendir($dir);
+			while (false !== ($filename = readdir($dh)))
+				if (is_file($filename) && !in_array($filename, $exclude))
+					$file_array[filemtime($filename)] = $filename;
+		ksort($file_array);
+		$file_array = array_reverse($file_array, true);
+		return $file_array;
+	}
+
 ?>
 <html lang="en-GB">
 	<head>
 		<meta charset="utf-8">
-		<title>Simple PHP Upload</title>
+		<title>strace.club</title>
 	</head>
 	<body>
-		<h1>Simple PHP Upload</h1>
-		<p>
-			Maximum upload size: <?php echo $data['max_upload_size']; ?>
-		</p>
+		<h1>strace.club</h1>
 		<form action="<?= $data['scriptname'] ?>" method="POST" enctype="multipart/form-data" class="dropzone" id="my-awesome-dropzone">
-			<div class="fallback">
-				Choose File: <input type="file" name="file[]" multiple required /><br />
-				<input type="submit" value="Upload" />
-			</div>
+			Maximum upload size: <?php echo $data['max_upload_size']; ?><br />
+			<input type="file" name="file[]" multiple required onchange="formname.submit();" />
 		</form>
 		<?php if ($settings['listfiles']) { ?>
-			<strong>Uploaded files:</strong><br />
+			<p>Uploaded files:</p>
 			<ul>
 				<?php
-					$dh = opendir($settings['uploaddir']);
-					while (false !== ($filename = readdir($dh)))
-						if (is_file($filename) && !in_array($filename, array('.', '..', $data['scriptname']))) {
-							$file_info = array();
+					$file_array = ListFiles($settings['uploaddir'], array('.', '..', $data['scriptname']));
+					foreach ($file_array as $mtime => $filename) {
+						$file_info = array();
 
-							if ($settings['listfiles_size'])
-								$file_info[] = FormatSize(filesize($filename));
+						if ($settings['listfiles_size'])
+							$file_info[] = FormatSize(filesize($filename));
 
-							if ($settings['listfiles_size'])
-								$file_info[] = date($settings['listfiles_date_format'], filemtime($filename));
+						if ($settings['listfiles_size'])
+							$file_info[] = date($settings['listfiles_date_format'], $mtime);
 
-							if ($settings['allow_deletion'])
-								if (in_array($filename, $_SESSION['upload_user_files']))
-									$file_info[] = '<form action="' . $data['scriptname'] . '" method="POST"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="delete" /><button type="submit">delete</button></form>';
+						if ($settings['allow_deletion'])
+							if (in_array($filename, $_SESSION['upload_user_files']))
+								$file_info[] = '<form action="' . $data['scriptname'] . '" method="POST"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="delete" /><button type="submit">delete</button></form>';
 
-							$file_info = implode(', ', $file_info);
+						$file_info = implode(', ', $file_info);
 
-							if (strlen($file_info) > 0)
-								$file_info = ' (' . $file_info . ')';
+						if (strlen($file_info) > 0)
+							$file_info = ' (' . $file_info . ')';
 
-							echo "<li><a href=\"$filename\">$filename</a>$file_info</li>";
-						}
+						echo "<li><a href=\"$filename\" target=\"_blank\">$filename<span>$file_info</span></a></li>";
+					}
 				?>
 			</ul>
 		<?php } ?>
