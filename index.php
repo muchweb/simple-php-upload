@@ -249,20 +249,11 @@
 				text-align: center;
 			}
 
-			body > p {
-				display: block;
-				background: rgba(255, 255, 255, 0.075);
-				padding: 4px 16px;
-				text-align: center;
-				max-width: 1000px;
-				margin: 16px auto 0 auto;
-			}
-
 			body > ul {
 				display: block;
 				padding: 0;
 				max-width: 1000px;
-				margin: 0 auto;
+				margin: 32px auto;
 			}
 
 			body > ul > li {
@@ -331,7 +322,6 @@
 			<input type="file" name="file[]" multiple required id="simpleupload-input"/>
 		</form>
 		<?php if ($settings['listfiles']) { ?>
-			<p>Uploaded files:</p>
 			<ul>
 				<?php
 					$file_array = ListFiles($settings['uploaddir'], array('.', '..', $data['scriptname']));
