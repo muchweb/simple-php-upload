@@ -14,8 +14,7 @@
 		along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	*/
 
-	// ============== Configuration begin  ==============
-
+	// =============={ Configuration Begin }==============
 	$settings = array(
 
 		// Directory to store uploaded files
@@ -52,11 +51,14 @@
 		debug => false,
 
 		// Complete URL to your directory (including tracing slash)
-		url => 'http://strace.club/',
+		url => 'http://strace.club/'
 
 	);
+	// =============={ Configuration End }==============
 
-	// ============== Configuration end  ==============
+
+
+
 
 	$data = array();
 
@@ -313,6 +315,19 @@
 			body > ul > li > form > button:active {
 				opacity: 0.5;
 			}
+
+			body > ul > li.uploading {
+				animation: upanim 2s linear 0s infinite alternate;
+			}
+
+			@keyframes upanim {
+				from {
+					opacity: 0.3;
+				}
+				to {
+					opacity: 0.8;
+				}
+			}
 		</style>
 	</head>
 	<body>
@@ -322,7 +337,7 @@
 			<input type="file" name="file[]" multiple required id="simpleupload-input"/>
 		</form>
 		<?php if ($settings['listfiles']) { ?>
-			<ul>
+			<ul id="simpleupload-ul">
 				<?php
 					$file_array = ListFiles($settings['uploaddir'], array('.', '..', $data['scriptname']));
 					foreach ($file_array as $mtime => $filename) {
@@ -373,8 +388,65 @@
 		<?php } ?>
 		<a href="https://github.com/muchweb/simple-php-upload"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
 		<script charset="utf-8">
-			document.getElementById('simpleupload-input').onchange = function() {
-				document.getElementById('simpleupload-form').submit();
+			var target_form = document.getElementById('simpleupload-form'),
+				target_ul = document.getElementById('simpleupload-ul'),
+				target_input = document.getElementById('simpleupload-input');
+
+			target_form.addEventListener('dragover', function (event) {
+				event.preventDefault();
+			}, false);
+
+			function AddFileLi (name, info) {
+				target_form.style.display = 'none';
+
+				var new_li = document.createElement('li');
+				new_li.className = 'uploading';
+
+				var new_a = document.createElement('a');
+				new_a.innerHTML = name;
+				new_li.appendChild(new_a);
+
+				var new_span = document.createElement('span');
+				new_span.innerHTML = info;
+				new_a.appendChild(new_span);
+
+				target_ul.insertBefore(new_li, target_ul.firstChild);
+			}
+
+			function HandleFiles (event) {
+				event.preventDefault();
+
+				var i = 0,
+					files = event.dataTransfer.files,
+					len = files.length;
+
+				//
+				// 	console.log('Filename: ' + files[i].name);
+				// 	console.log('Type: ' + files[i].type);
+				// 	console.log('Size: ' + files[i].size + ' bytes');
+				//
+
+				var form = new FormData();
+
+				for (; i < len; i++) {
+					form.append('file[]', files[i]);
+					AddFileLi(files[i].name, files[i].size + ' bytes');
+				}
+
+				// send via XHR - look ma, no headers being set!
+				var xhr = new XMLHttpRequest();
+				xhr.onload = function() {
+					window.location.reload();
+				}
+				xhr.open('post', '<?php echo $data['scriptname']; ?>', true);
+				xhr.send(form);
+			}
+
+			target_form.addEventListener('drop', HandleFiles, false);
+
+			document.getElementById('simpleupload-input').onchange = function () {
+				AddFileLi('Uploading...', '');
+				target_form.submit();
 			};
 		</script>
 	</body>
