@@ -2,7 +2,7 @@
 
 Simple single-file PHP file upload (file share hosting) script.
 
-> :warning: **Security warning**: There is no limit on file size or file type. Please make sure that file permissions are set right so nobody can execute uploaded executables. Or exscape your desired directory! Please skip to server configuration for examples.
+> :warning: **Security warning**: There is no limit on file size or file type. Please make sure that file permissions are set right so nobody can execute uploaded code. See [server configuration](#server-configuration) for examples.
 
 ## TODO
 
