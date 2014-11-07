@@ -135,6 +135,8 @@
 
 		$data['uploaded_file_name'] = basename($file_data['name']);
 		$data['target_file_name'] = $file_data['uploaded_file_name'];
+
+		// Generating random file name
 		if ($settings['random_name_len'] !== false) {
 			do {
 				$data['target_file_name'] = '';
@@ -145,14 +147,15 @@
 			} while (file_exists($data['target_file_name']));
 		}
 		$data['upload_target_file'] = $data['uploaddir'] . DIRECTORY_SEPARATOR . $data['target_file_name'];
-		$data['tmp_name'] = $file_data['tmp_name'];
 
+		// Do now allow to rewrite files
 		if (file_exists($data['upload_target_file'])) {
 			echo 'File name already exists' . "\n";
 			return;
 		}
 
-		if (move_uploaded_file($data['tmp_name'], $data['upload_target_file'])) {
+		// Moving uploaded file OK
+		if (move_uploaded_file($file_data['tmp_name'], $data['upload_target_file'])) {
 			if ($settings['allow_deletion'] || $settings['allow_private'])
 				$_SESSION['upload_user_files'][] = $data['target_file_name'];
 			echo $settings['url'] .  $data['target_file_name'] . "\n";
@@ -177,6 +180,7 @@
 			echo '</pre>';
 		}
 
+		header('Content-type: text/plain');
 		if (is_array($_FILES['file'])) {
 			$file_array = DiverseArray($_FILES['file']);
 			foreach ($file_array as $file_data)
@@ -288,7 +292,7 @@
 				font-size: 90%;
 			}
 
-			 body > ul > li > form {
+			body > ul > li > form {
 				display: inline-block;
 				padding: 0;
 				margin: 0;
@@ -420,12 +424,6 @@
 					files = event.dataTransfer.files,
 					len = files.length;
 
-				//
-				// 	console.log('Filename: ' + files[i].name);
-				// 	console.log('Type: ' + files[i].type);
-				// 	console.log('Size: ' + files[i].size + ' bytes');
-				//
-
 				var form = new FormData();
 
 				for (; i < len; i++) {
@@ -433,11 +431,11 @@
 					AddFileLi(files[i].name, files[i].size + ' bytes');
 				}
 
-				// send via XHR - look ma, no headers being set!
 				var xhr = new XMLHttpRequest();
 				xhr.onload = function() {
 					window.location.reload();
-				}
+				};
+
 				xhr.open('post', '<?php echo $data['scriptname']; ?>', true);
 				xhr.send(form);
 			}
