@@ -53,6 +53,9 @@
 		// Complete URL to your directory (including tracing slash)
 		url => 'http://strace.club/'
 
+		// Amount of seconds that each file should be stored for (0 for no limit)
+		time_limit => 0,
+
 	);
 	// =============={ Configuration End }==============
 
