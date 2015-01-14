@@ -17,6 +17,9 @@
 	// =============={ Configuration Begin }==============
 	$settings = array(
 
+		// Website title
+		title => 'strace.club',
+
 		// Directory to store uploaded files
 		uploaddir => '.',
 
@@ -56,17 +59,18 @@
 		// Amount of seconds that each file should be stored for (0 for no limit)
 		time_limit => 0,
 
+		// Files that will be ignored
+		ignores = array('.', '..', 'LICENSE', 'README.md'),
 	);
 	// =============={ Configuration End }==============
-
-
-
-
 
 	$data = array();
 
 	// Name of this file
 	$data['scriptname'] = pathinfo(__FILE__, PATHINFO_BASENAME);
+
+	// Adding current script name to ignore list
+	$data['ignores'][] = $data['scriptname'];
 
 	// Use canonized path
 	$data['uploaddir'] = realpath($settings['uploaddir']);
@@ -74,43 +78,48 @@
 	// Maximum upload size, set by system
 	$data['max_upload_size'] = ini_get('upload_max_filesize');
 
+	// If file deletion or private files are allowed, starting a session.
+	// This is required for user authentification
 	if ($settings['allow_deletion'] || $settings['allow_private']) {
 		session_start();
 
+		// 'User ID'
 		if (!isset($_SESSION['upload_user_id']))
-			$_SESSION['upload_user_id'] = rand(1000, 9999);
+			$_SESSION['upload_user_id'] = rand(100000, 999999);
 
+		// List of filenames that were uploaded by this user
 		if (!isset($_SESSION['upload_user_files']))
 			$_SESSION['upload_user_files'] = array();
 	}
 
+	// If debug is enabled, logging all variables
 	if ($settings['debug']) {
-
 
 		// Enabling error reporting
 		error_reporting(E_ALL);
 		error_reporting(1);
 
 		// Displaying debug information
-		echo '<h2>Debugging information: settings</h2>';
+		echo '<h2>Settings:</h2>';
 		echo '<pre>';
 		print_r($settings);
 		echo '</pre>';
 
 		// Displaying debug information
-		echo '<h2>Debugging information: data</h2>';
+		echo '<h2>Data:</h2>';
 		echo '<pre>';
 		print_r($data);
 		echo '</pre>';
 		echo '</pre>';
 
 		// Displaying debug information
-		echo '<h2>Debugging information: _SESSION</h2>';
+		echo '<h2>SESSION:</h2>';
 		echo '<pre>';
 		print_r($_SESSION);
 		echo '</pre>';
 	}
 
+	// Format file size
 	function FormatSize ($bytes) {
 		$units = array('B', 'KB', 'MB', 'GB', 'TB');
 
@@ -123,14 +132,16 @@
 		return ceil($bytes) . ' ' . $units[$pow];
 	}
 
+	// Rotating a two-dimensional array
 	function DiverseArray ($vector) {
 		$result = array();
-		foreach($vector as $key1 => $value1)
-			foreach($value1 as $key2 => $value2)
+		foreach ($vector as $key1 => $value1)
+			foreach ($value1 as $key2 => $value2)
 				$result[$key2][$key1] = $value2;
 		return $result;
 	}
 
+	// Handling file upload
 	function UploadFile ($file_data) {
 		global $settings;
 		global $data;
@@ -151,7 +162,7 @@
 		}
 		$data['upload_target_file'] = $data['uploaddir'] . DIRECTORY_SEPARATOR . $data['target_file_name'];
 
-		// Do now allow to rewrite files
+		// Do now allow to overwriting files
 		if (file_exists($data['upload_target_file'])) {
 			echo 'File name already exists' . "\n";
 			return;
@@ -168,21 +179,8 @@
 	}
 
 
-
+	// Files are being POSEed. Uploading them one by one.
 	if (isset($_FILES['file'])) {
-		if ($settings['debug']) {
-			// Displaying debug information
-			echo '<h2>Debugging information: data</h2>';
-			echo '<pre>';
-			print_r($data);
-			echo '</pre>';
-			// Displaying debug information
-			echo '<h2>Debugging information: file</h2>';
-			echo '<pre>';
-			print_r($_FILES);
-			echo '</pre>';
-		}
-
 		header('Content-type: text/plain');
 		if (is_array($_FILES['file'])) {
 			$file_array = DiverseArray($_FILES['file']);
@@ -193,6 +191,7 @@
 		exit;
 	}
 
+	// Other file functions (delete, private).
 	if (isset($_POST)) {
 		if ($settings['allow_deletion'])
 			if ($_POST['action'] === 'delete')
@@ -218,6 +217,7 @@
 					}
 	}
 
+	// List files in a given directory, excluding certain files
 	function ListFiles ($dir, $exclude) {
 		$file_array = array();
 		$dh = opendir($dir);
@@ -233,7 +233,7 @@
 <html lang="en-GB">
 	<head>
 		<meta charset="utf-8">
-		<title>strace.club</title>
+		<title><?=$settings['title']?></title>
 		<style media="screen">
 			body {
 				background: #111;
@@ -338,7 +338,7 @@
 		</style>
 	</head>
 	<body>
-		<h1>strace.club</h1>
+		<h1><?=$settings['title']?></h1>
 		<form action="<?= $data['scriptname'] ?>" method="POST" enctype="multipart/form-data" class="dropzone" id="simpleupload-form">
 			Maximum upload size: <?php echo $data['max_upload_size']; ?><br />
 			<input type="file" name="file[]" multiple required id="simpleupload-input"/>
@@ -346,7 +346,7 @@
 		<?php if ($settings['listfiles']) { ?>
 			<ul id="simpleupload-ul">
 				<?php
-					$file_array = ListFiles($settings['uploaddir'], array('.', '..', $data['scriptname']));
+					$file_array = ListFiles($settings['uploaddir'], $data['ignores']);
 					foreach ($file_array as $mtime => $filename) {
 						$file_info = array();
 						$file_owner = false;
