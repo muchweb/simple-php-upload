@@ -81,7 +81,7 @@ Do not allow uploaded code execution!
 
 ### NGINX configuration example
 
-Edit the NGINX configuration file (`/etc/nginx/nginx.conf`):
+Edit the NGINX configuration file (`/etc/nginx/sites-enabled/fileuploader`):
 
 	server {
 		listen 80 default_server;
