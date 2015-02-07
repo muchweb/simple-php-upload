@@ -81,6 +81,8 @@ Do not allow uploaded code execution!
 
 ### NGINX configuration example
 
+Edit the NGINX configuration file (`/etc/nginx/nginx.conf`):
+
 	server {
 		listen 80 default_server;
 		listen [::]:80 default_server ipv6only=on;
