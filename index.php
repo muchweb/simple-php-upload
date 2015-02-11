@@ -1,4 +1,8 @@
 <?php
+	ini_set('display_startup_errors',1);
+	ini_set('display_errors',1);
+	error_reporting(-1);
+
 	/*
 		This program is free software: you can redistribute it and/or modify
 		it under the terms of the GNU General Public License as published by
@@ -18,49 +22,49 @@
 	$settings = array(
 
 		// Website title
-		title => 'strace.club',
+		'title' => 'strace.club',
 
 		// Directory to store uploaded files
-		uploaddir => '.',
+		'uploaddir' => '.',
 
 		// Display list uploaded files
-		listfiles => true,
+		'listfiles' => true,
 
 		// Allow users to delete files that they have uploaded (will enable sessions)
-		allow_deletion => true,
+		'allow_deletion' => true,
 
 		// Allow users to mark files as hidden
-		allow_private => true,
+		'allow_private' => true,
 
 		// Display file sizes
-		listfiles_size => true,
+		'listfiles_size' => true,
 
 		// Display file dates
-		listfiles_date => true,
+		'listfiles_date' => true,
 
 		// Display file dates format
-		listfiles_date_format => 'F d Y H:i:s',
+		'listfiles_date_format' => 'F d Y H:i:s',
 
 		// Randomize file names (number of 'false')
-		random_name_len => 8,
+		'random_name_len' => 8,
 
 		// Keep filetype information (if random name is activated)
-		random_name_keep_type => true,
+		'random_name_keep_type' => true,
 
 		// Random file name letters
-		random_name_alphabet => 'qazwsxedcrfvtgbyhnujmikolp1234567890',
+		'random_name_alphabet' => 'qazwsxedcrfvtgbyhnujmikolp1234567890',
 
 		// Display debugging information
-		debug => false,
+		'debug' => true,
 
 		// Complete URL to your directory (including tracing slash)
-		url => 'http://strace.club/'
+		'url' => 'http://strace.club/',
 
 		// Amount of seconds that each file should be stored for (0 for no limit)
-		time_limit => 0,
+		'time_limit' => 0,
 
 		// Files that will be ignored
-		ignores = array('.', '..', 'LICENSE', 'README.md'),
+		'ignores' => array('.', '..', 'LICENSE', 'README.md'),
 	);
 	// =============={ Configuration End }==============
 
@@ -70,6 +74,7 @@
 	$data['scriptname'] = pathinfo(__FILE__, PATHINFO_BASENAME);
 
 	// Adding current script name to ignore list
+	$data['ignores'] = $settings['ignores'];
 	$data['ignores'][] = $data['scriptname'];
 
 	// Use canonized path
@@ -229,6 +234,12 @@
 		return $file_array;
 	}
 
+	$file_array = ListFiles($settings['uploaddir'], $data['ignores']);
+
+	foreach ($file_array as $value) {
+		echo($value.'<br>');
+	}
+
 ?>
 <html lang="en-GB">
 	<head>
@@ -346,7 +357,6 @@
 		<?php if ($settings['listfiles']) { ?>
 			<ul id="simpleupload-ul">
 				<?php
-					$file_array = ListFiles($settings['uploaddir'], $data['ignores']);
 					foreach ($file_array as $mtime => $filename) {
 						$file_info = array();
 						$file_owner = false;
