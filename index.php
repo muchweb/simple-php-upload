@@ -1,8 +1,4 @@
 <?php
-	ini_set('display_startup_errors',1);
-	ini_set('display_errors',1);
-	error_reporting(-1);
-
 	/*
 		This program is free software: you can redistribute it and/or modify
 		it under the terms of the GNU General Public License as published by
@@ -55,18 +51,26 @@
 		'random_name_alphabet' => 'qazwsxedcrfvtgbyhnujmikolp1234567890',
 
 		// Display debugging information
-		'debug' => true,
+		'debug' => false,
 
 		// Complete URL to your directory (including tracing slash)
 		'url' => 'http://strace.club/',
 
 		// Amount of seconds that each file should be stored for (0 for no limit)
-		'time_limit' => 0,
+		// Default 30 days
+		'time_limit' => 60 * 60 * 24 * 30,
 
 		// Files that will be ignored
 		'ignores' => array('.', '..', 'LICENSE', 'README.md'),
 	);
 	// =============={ Configuration End }==============
+
+	// Enabling error reporting
+	if ($settings['debug']) {
+		error_reporting(E_ALL);
+		ini_set('display_startup_errors',1);
+		ini_set('display_errors',1);
+	}
 
 	$data = array();
 
@@ -99,11 +103,6 @@
 
 	// If debug is enabled, logging all variables
 	if ($settings['debug']) {
-
-		// Enabling error reporting
-		error_reporting(E_ALL);
-		error_reporting(1);
-
 		// Displaying debug information
 		echo '<h2>Settings:</h2>';
 		echo '<pre>';
@@ -152,32 +151,32 @@
 		global $data;
 		global $_SESSION;
 
-		$data['uploaded_file_name'] = basename($file_data['name']);
-		$data['target_file_name'] = $file_data['uploaded_file_name'];
+		$file_data['uploaded_file_name'] = basename($file_data['name']);
+		$file_data['target_file_name'] = $file_data['uploaded_file_name'];
 
 		// Generating random file name
 		if ($settings['random_name_len'] !== false) {
 			do {
-				$data['target_file_name'] = '';
-				while (strlen($data['target_file_name']) < $settings['random_name_len'])
-					$data['target_file_name'] .= $settings['random_name_alphabet'][rand(0, strlen($settings['random_name_alphabet']) - 1)];
+				$file_data['target_file_name'] = '';
+				while (strlen($file_data['target_file_name']) < $settings['random_name_len'])
+					$file_data['target_file_name'] .= $settings['random_name_alphabet'][rand(0, strlen($settings['random_name_alphabet']) - 1)];
 				if ($settings['random_name_keep_type'])
-					$data['target_file_name'] .= '.' . pathinfo($data['uploaded_file_name'], PATHINFO_EXTENSION);
-			} while (file_exists($data['target_file_name']));
+					$file_data['target_file_name'] .= '.' . pathinfo($file_data['uploaded_file_name'], PATHINFO_EXTENSION);
+			} while (file_exists($file_data['target_file_name']));
 		}
-		$data['upload_target_file'] = $data['uploaddir'] . DIRECTORY_SEPARATOR . $data['target_file_name'];
+		$file_data['upload_target_file'] = $data['uploaddir'] . DIRECTORY_SEPARATOR . $file_data['target_file_name'];
 
 		// Do now allow to overwriting files
-		if (file_exists($data['upload_target_file'])) {
+		if (file_exists($file_data['upload_target_file'])) {
 			echo 'File name already exists' . "\n";
 			return;
 		}
 
 		// Moving uploaded file OK
-		if (move_uploaded_file($file_data['tmp_name'], $data['upload_target_file'])) {
+		if (move_uploaded_file($file_data['tmp_name'], $file_data['upload_target_file'])) {
 			if ($settings['allow_deletion'] || $settings['allow_private'])
-				$_SESSION['upload_user_files'][] = $data['target_file_name'];
-			echo $settings['url'] .  $data['target_file_name'] . "\n";
+				$_SESSION['upload_user_files'][] = $file_data['target_file_name'];
+			echo $settings['url'] .  $file_data['target_file_name'] . "\n";
 		} else {
 			echo 'Error: unable to upload the file.';
 		}
@@ -199,7 +198,7 @@
 	// Other file functions (delete, private).
 	if (isset($_POST)) {
 		if ($settings['allow_deletion'])
-			if ($_POST['action'] === 'delete')
+			if (isset($_POST['action']) && $_POST['action'] === 'delete')
 				if (in_array(substr($_POST['target'], 1), $_SESSION['upload_user_files']) || in_array($_POST['target'], $_SESSION['upload_user_files']))
 					if (file_exists($_POST['target'])) {
 						unlink($_POST['target']);
@@ -208,7 +207,7 @@
 					}
 
 		if ($settings['allow_private'])
-			if ($_POST['action'] === 'privatetoggle')
+			if (isset($_POST['action']) && $_POST['action'] === 'privatetoggle')
 				if (in_array(substr($_POST['target'], 1), $_SESSION['upload_user_files']) || in_array($_POST['target'], $_SESSION['upload_user_files']))
 					if (file_exists($_POST['target'])) {
 						if ($_POST['target'][0] === '.') {
@@ -236,9 +235,12 @@
 
 	$file_array = ListFiles($settings['uploaddir'], $data['ignores']);
 
-	foreach ($file_array as $value) {
-		echo($value.'<br>');
-	}
+	// Removing old files
+	foreach ($file_array as $file)
+		if ($settings['time_limit'] < time() - filemtime($file))
+			unlink($file);
+
+	$file_array = ListFiles($settings['uploaddir'], $data['ignores']);
 
 ?>
 <html lang="en-GB">
