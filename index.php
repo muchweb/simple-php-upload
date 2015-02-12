@@ -17,53 +17,69 @@
 	// =============={ Configuration Begin }==============
 	$settings = array(
 
+		// Website title
+		'title' => 'strace.club',
+
 		// Directory to store uploaded files
-		uploaddir => '.',
+		'uploaddir' => '.',
 
 		// Display list uploaded files
-		listfiles => true,
+		'listfiles' => true,
 
 		// Allow users to delete files that they have uploaded (will enable sessions)
-		allow_deletion => true,
+		'allow_deletion' => true,
 
 		// Allow users to mark files as hidden
-		allow_private => true,
+		'allow_private' => true,
 
 		// Display file sizes
-		listfiles_size => true,
+		'listfiles_size' => true,
 
 		// Display file dates
-		listfiles_date => true,
+		'listfiles_date' => true,
 
 		// Display file dates format
-		listfiles_date_format => 'F d Y H:i:s',
+		'listfiles_date_format' => 'F d Y H:i:s',
 
 		// Randomize file names (number of 'false')
-		random_name_len => 8,
+		'random_name_len' => 8,
 
 		// Keep filetype information (if random name is activated)
-		random_name_keep_type => true,
+		'random_name_keep_type' => true,
 
 		// Random file name letters
-		random_name_alphabet => 'qazwsxedcrfvtgbyhnujmikolp1234567890',
+		'random_name_alphabet' => 'qazwsxedcrfvtgbyhnujmikolp1234567890',
 
 		// Display debugging information
-		debug => false,
+		'debug' => false,
 
 		// Complete URL to your directory (including tracing slash)
-		url => 'http://strace.club/'
+		'url' => 'http://strace.club/',
 
+		// Amount of seconds that each file should be stored for (0 for no limit)
+		// Default 30 days
+		'time_limit' => 60 * 60 * 24 * 30,
+
+		// Files that will be ignored
+		'ignores' => array('.', '..', 'LICENSE', 'README.md'),
 	);
 	// =============={ Configuration End }==============
 
-
-
-
+	// Enabling error reporting
+	if ($settings['debug']) {
+		error_reporting(E_ALL);
+		ini_set('display_startup_errors',1);
+		ini_set('display_errors',1);
+	}
 
 	$data = array();
 
 	// Name of this file
 	$data['scriptname'] = pathinfo(__FILE__, PATHINFO_BASENAME);
+
+	// Adding current script name to ignore list
+	$data['ignores'] = $settings['ignores'];
+	$data['ignores'][] = $data['scriptname'];
 
 	// Use canonized path
 	$data['uploaddir'] = realpath($settings['uploaddir']);
@@ -71,43 +87,43 @@
 	// Maximum upload size, set by system
 	$data['max_upload_size'] = ini_get('upload_max_filesize');
 
+	// If file deletion or private files are allowed, starting a session.
+	// This is required for user authentification
 	if ($settings['allow_deletion'] || $settings['allow_private']) {
 		session_start();
 
+		// 'User ID'
 		if (!isset($_SESSION['upload_user_id']))
-			$_SESSION['upload_user_id'] = rand(1000, 9999);
+			$_SESSION['upload_user_id'] = rand(100000, 999999);
 
+		// List of filenames that were uploaded by this user
 		if (!isset($_SESSION['upload_user_files']))
 			$_SESSION['upload_user_files'] = array();
 	}
 
+	// If debug is enabled, logging all variables
 	if ($settings['debug']) {
-
-
-		// Enabling error reporting
-		error_reporting(E_ALL);
-		error_reporting(1);
-
 		// Displaying debug information
-		echo '<h2>Debugging information: settings</h2>';
+		echo '<h2>Settings:</h2>';
 		echo '<pre>';
 		print_r($settings);
 		echo '</pre>';
 
 		// Displaying debug information
-		echo '<h2>Debugging information: data</h2>';
+		echo '<h2>Data:</h2>';
 		echo '<pre>';
 		print_r($data);
 		echo '</pre>';
 		echo '</pre>';
 
 		// Displaying debug information
-		echo '<h2>Debugging information: _SESSION</h2>';
+		echo '<h2>SESSION:</h2>';
 		echo '<pre>';
 		print_r($_SESSION);
 		echo '</pre>';
 	}
 
+	// Format file size
 	function FormatSize ($bytes) {
 		$units = array('B', 'KB', 'MB', 'GB', 'TB');
 
@@ -120,66 +136,55 @@
 		return ceil($bytes) . ' ' . $units[$pow];
 	}
 
+	// Rotating a two-dimensional array
 	function DiverseArray ($vector) {
 		$result = array();
-		foreach($vector as $key1 => $value1)
-			foreach($value1 as $key2 => $value2)
+		foreach ($vector as $key1 => $value1)
+			foreach ($value1 as $key2 => $value2)
 				$result[$key2][$key1] = $value2;
 		return $result;
 	}
 
+	// Handling file upload
 	function UploadFile ($file_data) {
 		global $settings;
 		global $data;
 		global $_SESSION;
 
-		$data['uploaded_file_name'] = basename($file_data['name']);
-		$data['target_file_name'] = $file_data['uploaded_file_name'];
+		$file_data['uploaded_file_name'] = basename($file_data['name']);
+		$file_data['target_file_name'] = $file_data['uploaded_file_name'];
 
 		// Generating random file name
 		if ($settings['random_name_len'] !== false) {
 			do {
-				$data['target_file_name'] = '';
-				while (strlen($data['target_file_name']) < $settings['random_name_len'])
-					$data['target_file_name'] .= $settings['random_name_alphabet'][rand(0, strlen($settings['random_name_alphabet']) - 1)];
+				$file_data['target_file_name'] = '';
+				while (strlen($file_data['target_file_name']) < $settings['random_name_len'])
+					$file_data['target_file_name'] .= $settings['random_name_alphabet'][rand(0, strlen($settings['random_name_alphabet']) - 1)];
 				if ($settings['random_name_keep_type'])
-					$data['target_file_name'] .= '.' . pathinfo($data['uploaded_file_name'], PATHINFO_EXTENSION);
-			} while (file_exists($data['target_file_name']));
+					$file_data['target_file_name'] .= '.' . pathinfo($file_data['uploaded_file_name'], PATHINFO_EXTENSION);
+			} while (file_exists($file_data['target_file_name']));
 		}
-		$data['upload_target_file'] = $data['uploaddir'] . DIRECTORY_SEPARATOR . $data['target_file_name'];
+		$file_data['upload_target_file'] = $data['uploaddir'] . DIRECTORY_SEPARATOR . $file_data['target_file_name'];
 
-		// Do now allow to rewrite files
-		if (file_exists($data['upload_target_file'])) {
+		// Do now allow to overwriting files
+		if (file_exists($file_data['upload_target_file'])) {
 			echo 'File name already exists' . "\n";
 			return;
 		}
 
 		// Moving uploaded file OK
-		if (move_uploaded_file($file_data['tmp_name'], $data['upload_target_file'])) {
+		if (move_uploaded_file($file_data['tmp_name'], $file_data['upload_target_file'])) {
 			if ($settings['allow_deletion'] || $settings['allow_private'])
-				$_SESSION['upload_user_files'][] = $data['target_file_name'];
-			echo $settings['url'] .  $data['target_file_name'] . "\n";
+				$_SESSION['upload_user_files'][] = $file_data['target_file_name'];
+			echo $settings['url'] .  $file_data['target_file_name'] . "\n";
 		} else {
 			echo 'Error: unable to upload the file.';
 		}
 	}
 
 
-
+	// Files are being POSEed. Uploading them one by one.
 	if (isset($_FILES['file'])) {
-		if ($settings['debug']) {
-			// Displaying debug information
-			echo '<h2>Debugging information: data</h2>';
-			echo '<pre>';
-			print_r($data);
-			echo '</pre>';
-			// Displaying debug information
-			echo '<h2>Debugging information: file</h2>';
-			echo '<pre>';
-			print_r($_FILES);
-			echo '</pre>';
-		}
-
 		header('Content-type: text/plain');
 		if (is_array($_FILES['file'])) {
 			$file_array = DiverseArray($_FILES['file']);
@@ -190,9 +195,10 @@
 		exit;
 	}
 
+	// Other file functions (delete, private).
 	if (isset($_POST)) {
 		if ($settings['allow_deletion'])
-			if ($_POST['action'] === 'delete')
+			if (isset($_POST['action']) && $_POST['action'] === 'delete')
 				if (in_array(substr($_POST['target'], 1), $_SESSION['upload_user_files']) || in_array($_POST['target'], $_SESSION['upload_user_files']))
 					if (file_exists($_POST['target'])) {
 						unlink($_POST['target']);
@@ -201,7 +207,7 @@
 					}
 
 		if ($settings['allow_private'])
-			if ($_POST['action'] === 'privatetoggle')
+			if (isset($_POST['action']) && $_POST['action'] === 'privatetoggle')
 				if (in_array(substr($_POST['target'], 1), $_SESSION['upload_user_files']) || in_array($_POST['target'], $_SESSION['upload_user_files']))
 					if (file_exists($_POST['target'])) {
 						if ($_POST['target'][0] === '.') {
@@ -215,6 +221,7 @@
 					}
 	}
 
+	// List files in a given directory, excluding certain files
 	function ListFiles ($dir, $exclude) {
 		$file_array = array();
 		$dh = opendir($dir);
@@ -226,11 +233,20 @@
 		return $file_array;
 	}
 
+	$file_array = ListFiles($settings['uploaddir'], $data['ignores']);
+
+	// Removing old files
+	foreach ($file_array as $file)
+		if ($settings['time_limit'] < time() - filemtime($file))
+			unlink($file);
+
+	$file_array = ListFiles($settings['uploaddir'], $data['ignores']);
+
 ?>
 <html lang="en-GB">
 	<head>
 		<meta charset="utf-8">
-		<title>strace.club</title>
+		<title><?=$settings['title']?></title>
 		<style media="screen">
 			body {
 				background: #111;
@@ -335,7 +351,7 @@
 		</style>
 	</head>
 	<body>
-		<h1>strace.club</h1>
+		<h1><?=$settings['title']?></h1>
 		<form action="<?= $data['scriptname'] ?>" method="POST" enctype="multipart/form-data" class="dropzone" id="simpleupload-form">
 			Maximum upload size: <?php echo $data['max_upload_size']; ?><br />
 			<input type="file" name="file[]" multiple required id="simpleupload-input"/>
@@ -343,7 +359,6 @@
 		<?php if ($settings['listfiles']) { ?>
 			<ul id="simpleupload-ul">
 				<?php
-					$file_array = ListFiles($settings['uploaddir'], array('.', '..', $data['scriptname']));
 					foreach ($file_array as $mtime => $filename) {
 						$file_info = array();
 						$file_owner = false;
