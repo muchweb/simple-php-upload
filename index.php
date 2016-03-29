@@ -483,19 +483,42 @@
 		?>
 		<script type="text/javascript">
 		<!--
-			var target_form  = document.getElementById('simpleupload-form');
-			var target_ul= document.getElementById('simpleupload-ul');
-			var target_input = document.getElementById('simpleupload-input');
+			// Init some variales to shorten code
+			var target_form        = document.getElementById('simpleupload-form');
+			var target_ul          = document.getElementById('simpleupload-ul');
+			var target_input       = document.getElementById('simpleupload-input');
 			var settings_listfiles = <?=($settings['listfiles'] ? 'true' : 'false')?>;
 
-			target_form.addEventListener('dragover', function (event) {
-				event.preventDefault();
-			}, false);
+			/**
+			 * Initializes the upload form
+			 */
+			function init () {
+				// Register drag-over event listener
+				target_form.addEventListener('dragover', function (event) {
+					event.preventDefault();
+				}, false);
 
+				// ... and the drop event listener
+				target_form.addEventListener('drop', handleFiles, false);
+
+				// Register onchange-event function
+				target_input.onchange = function () {
+					addFileLi('Uploading...', '');
+					target_form.submit();
+				};
+			}
+
+			/**
+			 * Adds given file in a new li-tag to target_ul list
+			 *
+			 * @param name Name of the file
+			 * @param info Some more informations
+			 */
 			function addFileLi (name, info) {
 				if (settings_listfiles == false) {
 					return;
 				}
+
 				target_form.style.display = 'none';
 
 				var new_li = document.createElement('li');
@@ -512,6 +535,11 @@
 				target_ul.insertBefore(new_li, target_ul.firstChild);
 			}
 
+			/**
+			 * Handles given event for file upload
+			 *
+			 * @param event Event to handle file upload for
+			 */
 			function handleFiles (event) {
 				event.preventDefault();
 
@@ -533,12 +561,9 @@
 				xhr.send(form);
 			}
 
-			target_form.addEventListener('drop', handleFiles, false);
+			// Initialize upload form
+			init();
 
-			document.getElementById('simpleupload-input').onchange = function () {
-				addFileLi('Uploading...', '');
-				target_form.submit();
-			};
 		//-->
 		</script>
 	</body>
