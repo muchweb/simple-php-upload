@@ -71,6 +71,12 @@
 	);
 	// =============={ Configuration End }==============
 
+	// Is the local config file there?
+	if (file_exists('config-local.php')) {
+		// Load it then
+		include('config-local.php');
+	}
+
 	// Enabling error reporting
 	if ($settings['debug']) {
 		error_reporting(E_ALL);
