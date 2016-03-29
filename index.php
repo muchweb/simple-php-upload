@@ -250,10 +250,10 @@
 	}
 
 	// List files in a given directory, excluding certain files
-	function listFiles ($dir, $exclude) {
+	function createArrayFromPath ($dir, $exclude) {
 		$file_array = array();
 		$dh = opendir($dir);
-			while (false !== ($filename = readdir($dh))) {
+			while ($filename = readdir($dh)) {
 				$fqfn = $dir . DIRECTORY_SEPARATOR . $filename;
 				if (is_file($fqfn) && !in_array($filename, $exclude))
 					$file_array[filemtime($fqfn)] = $filename;
@@ -277,13 +277,13 @@
 
 	// Only read files if the feature is enabled
 	if ($settings['listfiles']) {
-		$file_array = listFiles($data['uploaddir'], $data['ignores']);
+		$file_array = createArrayFromPath($data['uploaddir'], $data['ignores']);
 
 		// Removing old files
 		if ($settings['remove_old_files'])
 			removeOldFiles($data['uploaddir']);
 
-		$file_array = listFiles($data['uploaddir'], $data['ignores']);
+		$file_array = createArrayFromPath($data['uploaddir'], $data['ignores']);
 	}
 ?>
 <!DOCTYPE html>
