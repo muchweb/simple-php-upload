@@ -93,11 +93,11 @@
 	$data = array();
 
 	// Name of this file
-	$data['scriptname'] = pathinfo(__FILE__, PATHINFO_BASENAME);
+	$data['scriptname'] = $settings['url'] . '/' . pathinfo(__FILE__, PATHINFO_BASENAME);
 
 	// Adding current script name to ignore list
 	$data['ignores'] = $settings['ignores'];
-	$data['ignores'][] = $data['scriptname'];
+	$data['ignores'][] = basename($data['scriptname']);
 
 	// Use canonized path
 	$data['uploaddir'] = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . $settings['uploaddir']);
@@ -296,16 +296,18 @@
 		$file_array = createArrayFromPath($data['uploaddir']);
 	}
 ?>
-<!DOCTYPE html>
-<html lang="<?=$settings['lang']?>" dir="<?=$settings['lang_dir']?>">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?=$settings['lang']?>" lang="<?=$settings['lang']?>" dir="<?=$settings['lang_dir']?>">
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<meta http-equiv="Content-Script-Type" content="text/javascript">
-		<meta name="robots" content="noindex">
-		<meta name="referrer" content="origin-when-crossorigin">
+		<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+		<meta http-equiv="content-style-type" content="text/css" />
+		<meta http-equiv="content-script-type" content="text/javascript" />
+		<meta http-equiv="language" content="de" />
+
+		<meta name="robots" content="noindex" />
+		<meta name="referrer" content="origin-when-crossorigin" />
 		<title><?=$settings['title']?></title>
-		<style media="screen">
-		<!--
+		<style type="text/css" media="screen">
 			body {
 				background: #111;
 				margin: 0;
@@ -406,14 +408,13 @@
 					opacity: 0.8;
 				}
 			}
-		//-->
 		</style>
 	</head>
 	<body>
 		<h1><?=$settings['title']?></h1>
-		<form action="<?= $data['scriptname'] ?>" method="POST" enctype="multipart/form-data" class="dropzone" id="simpleupload-form">
+		<form action="<?= $data['scriptname'] ?>" method="post" enctype="multipart/form-data" class="dropzone" id="simpleupload-form">
 			Maximum upload size: <?php echo $data['max_upload_size']; ?><br />
-			<input type="file" name="file[]" multiple required id="simpleupload-input"/>
+			<input type="file" name="file[]" id="simpleupload-input" />
 		</form>
 		<?php if ($settings['listfiles']) { ?>
 			<ul id="simpleupload-ul">
@@ -452,13 +453,13 @@
 
 							if ($file_owner) {
 								if ($settings['allow_deletion'])
-									echo '<form action="' . $data['scriptname'] . '" method="POST"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="delete" /><button type="submit">delete</button></form>';
+									echo '<form action="' . $data['scriptname'] . '" method="post"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="delete" /><button type="submit">delete</button></form>';
 
 								if ($settings['allow_private'])
 									if ($file_private)
-										echo '<form action="' . $data['scriptname'] . '" method="POST"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="privatetoggle" /><button type="submit">make public</button></form>';
+										echo '<form action="' . $data['scriptname'] . '" method="post"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="privatetoggle" /><button type="submit">make public</button></form>';
 									else
-										echo '<form action="' . $data['scriptname'] . '" method="POST"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="privatetoggle" /><button type="submit">make private</button></form>';
+										echo '<form action="' . $data['scriptname'] . '" method="post"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="privatetoggle" /><button type="submit">make private</button></form>';
 							}
 
 							echo "</li>";
