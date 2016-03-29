@@ -201,7 +201,7 @@
 
 		if (in_array(substr($file, 1), $_SESSION['upload_user_files']) || in_array($file, $_SESSION['upload_user_files'])) {
 			$fqfn = $data['uploaddir'] . DIRECTORY_SEPARATOR . $file;
-			if (file_exists($fqfn)) {
+			if (!in_array($file, $data['ignores']) && file_exists($fqfn)) {
 				unlink($fqfn);
 				echo 'File has been removed';
 				exit;
@@ -215,7 +215,7 @@
 
 		if (in_array(substr($file, 1), $_SESSION['upload_user_files']) || in_array($file, $_SESSION['upload_user_files'])) {
 			$fqfn = $data['uploaddir'] . DIRECTORY_SEPARATOR . $file;
-			if (file_exists($fqfn)) {
+			if (!in_array($file, $data['ignores']) && file_exists($fqfn)) {
 				if (substr($file, 0, 1) === '.') {
 					rename($fqfn, substr($fqfn, 1));
 					echo 'File has been made visible';
@@ -250,12 +250,14 @@
 	}
 
 	// List files in a given directory, excluding certain files
-	function createArrayFromPath ($dir, $exclude) {
+	function createArrayFromPath ($dir) {
+		global $data;
+
 		$file_array = array();
 		$dh = opendir($dir);
 			while ($filename = readdir($dh)) {
 				$fqfn = $dir . DIRECTORY_SEPARATOR . $filename;
-				if (is_file($fqfn) && !in_array($filename, $exclude))
+				if (is_file($fqfn) && !in_array($filename, $data['ignores']))
 					$file_array[filemtime($fqfn)] = $filename;
 			}
 
@@ -277,13 +279,13 @@
 
 	// Only read files if the feature is enabled
 	if ($settings['listfiles']) {
-		$file_array = createArrayFromPath($data['uploaddir'], $data['ignores']);
+		$file_array = createArrayFromPath($data['uploaddir']);
 
 		// Removing old files
 		if ($settings['remove_old_files'])
 			removeOldFiles($data['uploaddir']);
 
-		$file_array = createArrayFromPath($data['uploaddir'], $data['ignores']);
+		$file_array = createArrayFromPath($data['uploaddir']);
 	}
 ?>
 <!DOCTYPE html>
