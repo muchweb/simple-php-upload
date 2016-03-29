@@ -68,6 +68,9 @@
 
 		// Language direction
 		'lang_dir' => 'ltr',
+
+		// Remove old files?
+		'remove_old_files' => true,
 	);
 	// =============={ Configuration End }==============
 
@@ -237,22 +240,35 @@
 	function listFiles ($dir, $exclude) {
 		$file_array = array();
 		$dh = opendir($dir);
-			while (false !== ($filename = readdir($dh)))
-				if (is_file($filename) && !in_array($filename, $exclude))
-					$file_array[filemtime($filename)] = $filename;
+			while (false !== ($filename = readdir($dh))) {
+				$fqfn = $dir . DIRECTORY_SEPARATOR . $filename;
+				if (is_file($fqfn) && !in_array($filename, $exclude))
+					$file_array[filemtime($fqfn)] = $filename;
+			}
+
 		ksort($file_array);
 		$file_array = array_reverse($file_array, true);
 		return $file_array;
 	}
 
-	$file_array = listFiles($settings['uploaddir'], $data['ignores']);
+	// Removes old files
+	function removeOldFiles ($dir) {
+		global $file_array, $settings;
+		foreach ($file_array as $file) {
+			$fqfn = $dir . DIRECTORY_SEPARATOR . $file;
+			if ($settings['time_limit'] < time() - filemtime($fqfn))
+				unlink($fqfn);
+		}
+	}
+
+	$file_array = listFiles($data['uploaddir'], $data['ignores']);
 
 	// Removing old files
-	foreach ($file_array as $file)
-		if ($settings['time_limit'] < time() - filemtime($file))
-			unlink($file);
+	if ($settings['remove_old_files'])
+		removeOldFiles($data['uploaddir']);
 
-	$file_array = listFiles($settings['uploaddir'], $data['ignores']);
+	$file_array = listFiles($data['uploaddir'], $data['ignores']);
+	//die(print_r($file_array, TRUE));
 ?>
 <!DOCTYPE html>
 <html lang="<?=$settings['lang']?>" dir="<?=$settings['lang_dir']?>">
@@ -377,12 +393,13 @@
 			<ul id="simpleupload-ul">
 				<?php
 					foreach ($file_array as $mtime => $filename) {
+						$fqfn = $data['uploaddir'] . DIRECTORY_SEPARATOR . $filename;
 						$file_info = array();
 						$file_owner = false;
 						$file_private = $filename[0] === '.';
 
 						if ($settings['listfiles_size'])
-							$file_info[] = formatSize(filesize($filename));
+							$file_info[] = formatSize(filesize($fqfn));
 
 						if ($settings['listfiles_size'])
 							$file_info[] = date($settings['listfiles_date_format'], $mtime);
@@ -403,7 +420,9 @@
 						if (!$file_private || $file_owner) {
 							echo "<li class=\"' . $class . '\">";
 
-							echo "<a href=\"$filename\" target=\"_blank\">$filename<span>$file_info</span></a>";
+							$url = str_replace('/./', '/', sprintf('%s%s/%s', $settings['url'], $settings['uploaddir'], $filename));
+
+							echo "<a href=\"$url\" target=\"_blank\">$filename<span>$file_info</span></a>";
 
 							if ($file_owner) {
 								if ($settings['allow_deletion'])
