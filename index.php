@@ -447,6 +447,7 @@
 						if (!$file_private || $file_owner) {
 							echo "<li class=\"' . $class . '\">";
 
+							// Create full-qualified URL and clean it a bit
 							$url = str_replace('/./', '/', sprintf('%s%s/%s', $settings['url'], $settings['uploaddir'], $filename));
 
 							echo "<a href=\"$url\" target=\"_blank\">$filename<span>$file_info</span></a>";
@@ -483,14 +484,18 @@
 		<script type="text/javascript">
 		<!--
 			var target_form  = document.getElementById('simpleupload-form');
-			var target_ul    = document.getElementById('simpleupload-ul');
+			var target_ul= document.getElementById('simpleupload-ul');
 			var target_input = document.getElementById('simpleupload-input');
+			var settings_listfiles = <?=($settings['listfiles'] ? 'true' : 'false')?>;
 
 			target_form.addEventListener('dragover', function (event) {
 				event.preventDefault();
 			}, false);
 
 			function addFileLi (name, info) {
+				if (settings_listfiles == false) {
+					return;
+				}
 				target_form.style.display = 'none';
 
 				var new_li = document.createElement('li');
