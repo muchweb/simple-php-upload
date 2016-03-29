@@ -136,7 +136,7 @@
 	}
 
 	// Format file size
-	function FormatSize ($bytes) {
+	function formatSize ($bytes) {
 		$units = array('B', 'KB', 'MB', 'GB', 'TB');
 
 		$bytes = max($bytes, 0);
@@ -149,7 +149,7 @@
 	}
 
 	// Rotating a two-dimensional array
-	function DiverseArray ($vector) {
+	function diverseArray ($vector) {
 		$result = array();
 		foreach ($vector as $key1 => $value1)
 			foreach ($value1 as $key2 => $value2)
@@ -158,7 +158,7 @@
 	}
 
 	// Handling file upload
-	function UploadFile ($file_data) {
+	function uploadFile ($file_data) {
 		global $settings;
 		global $data;
 		global $_SESSION;
@@ -199,11 +199,11 @@
 	if (isset($_FILES['file'])) {
 		header('Content-type: text/plain');
 		if (is_array($_FILES['file'])) {
-			$file_array = DiverseArray($_FILES['file']);
+			$file_array = diverseArray($_FILES['file']);
 			foreach ($file_array as $file_data)
-				UploadFile($file_data);
+				uploadFile($file_data);
 		} else
-			UploadFile($_FILES['file']);
+			uploadFile($_FILES['file']);
 		exit;
 	}
 
@@ -234,7 +234,7 @@
 	}
 
 	// List files in a given directory, excluding certain files
-	function ListFiles ($dir, $exclude) {
+	function listFiles ($dir, $exclude) {
 		$file_array = array();
 		$dh = opendir($dir);
 			while (false !== ($filename = readdir($dh)))
@@ -245,14 +245,14 @@
 		return $file_array;
 	}
 
-	$file_array = ListFiles($settings['uploaddir'], $data['ignores']);
+	$file_array = listFiles($settings['uploaddir'], $data['ignores']);
 
 	// Removing old files
 	foreach ($file_array as $file)
 		if ($settings['time_limit'] < time() - filemtime($file))
 			unlink($file);
 
-	$file_array = ListFiles($settings['uploaddir'], $data['ignores']);
+	$file_array = listFiles($settings['uploaddir'], $data['ignores']);
 
 ?>
 <!DOCTYPE html>
@@ -383,7 +383,7 @@
 						$file_private = $filename[0] === '.';
 
 						if ($settings['listfiles_size'])
-							$file_info[] = FormatSize(filesize($filename));
+							$file_info[] = formatSize(filesize($filename));
 
 						if ($settings['listfiles_size'])
 							$file_info[] = date($settings['listfiles_date_format'], $mtime);
