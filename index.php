@@ -62,6 +62,12 @@
 
 		// Files that will be ignored
 		'ignores' => array('.', '..', 'LICENSE', 'README.md'),
+
+		// Language code
+		'lang' => 'en_GB',
+
+		// Language direction
+		'lang_dir' => 'ltr',
 	);
 	// =============={ Configuration End }==============
 
@@ -243,11 +249,16 @@
 	$file_array = ListFiles($settings['uploaddir'], $data['ignores']);
 
 ?>
-<html lang="en-GB">
+<!DOCTYPE html>
+<html lang="<?=$settings['lang']?>" dir="<?=$settings['lang_dir']?>">
 	<head>
-		<meta charset="utf-8">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta http-equiv="Content-Script-Type" content="text/javascript">
+		<meta name="robots" content="noindex">
+		<meta name="referrer" content="origin-when-crossorigin">
 		<title><?=$settings['title']?></title>
 		<style media="screen">
+		<!--
 			body {
 				background: #111;
 				margin: 0;
@@ -348,6 +359,7 @@
 					opacity: 0.8;
 				}
 			}
+		//-->
 		</style>
 	</head>
 	<body>
