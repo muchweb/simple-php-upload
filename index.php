@@ -482,15 +482,15 @@
 		?>
 		<script type="text/javascript">
 		<!--
-			var target_form = document.getElementById('simpleupload-form'),
-				target_ul = document.getElementById('simpleupload-ul'),
-				target_input = document.getElementById('simpleupload-input');
+			var target_form  = document.getElementById('simpleupload-form');
+			var target_ul    = document.getElementById('simpleupload-ul');
+			var target_input = document.getElementById('simpleupload-input');
 
 			target_form.addEventListener('dragover', function (event) {
 				event.preventDefault();
 			}, false);
 
-			function AddFileLi (name, info) {
+			function addFileLi (name, info) {
 				target_form.style.display = 'none';
 
 				var new_li = document.createElement('li');
@@ -507,18 +507,16 @@
 				target_ul.insertBefore(new_li, target_ul.firstChild);
 			}
 
-			function HandleFiles (event) {
+			function handleFiles (event) {
 				event.preventDefault();
 
-				var i = 0,
-					files = event.dataTransfer.files,
-					len = files.length;
+				var files = event.dataTransfer.files;
 
 				var form = new FormData();
 
-				for (; i < len; i++) {
+				for (var i = 0; i < files.length; i++) {
 					form.append('file[]', files[i]);
-					AddFileLi(files[i].name, files[i].size + ' bytes');
+					addFileLi(files[i].name, files[i].size + ' bytes');
 				}
 
 				var xhr = new XMLHttpRequest();
@@ -530,10 +528,10 @@
 				xhr.send(form);
 			}
 
-			target_form.addEventListener('drop', HandleFiles, false);
+			target_form.addEventListener('drop', handleFiles, false);
 
 			document.getElementById('simpleupload-input').onchange = function () {
-				AddFileLi('Uploading...', '');
+				addFileLi('Uploading...', '');
 				target_form.submit();
 			};
 		//-->
