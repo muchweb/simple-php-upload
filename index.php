@@ -64,7 +64,7 @@
 		'ignores' => array('.', '..', 'LICENSE', 'README.md'),
 
 		// Language code
-		'lang' => 'en_GB',
+		'lang' => 'en',
 
 		// Language direction
 		'lang_dir' => 'ltr',
