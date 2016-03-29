@@ -94,7 +94,7 @@
 	$data['ignores'][] = $data['scriptname'];
 
 	// Use canonized path
-	$data['uploaddir'] = realpath($settings['uploaddir']);
+	$data['uploaddir'] = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . $settings['uploaddir']);
 
 	// Maximum upload size, set by system
 	$data['max_upload_size'] = ini_get('upload_max_filesize');
@@ -253,7 +253,6 @@
 			unlink($file);
 
 	$file_array = listFiles($settings['uploaddir'], $data['ignores']);
-
 ?>
 <!DOCTYPE html>
 <html lang="<?=$settings['lang']?>" dir="<?=$settings['lang_dir']?>">
