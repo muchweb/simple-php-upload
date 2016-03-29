@@ -261,14 +261,16 @@
 		}
 	}
 
-	$file_array = listFiles($data['uploaddir'], $data['ignores']);
+	// Only read files if the feature is enabled
+	if ($settings['listfiles']) {
+		$file_array = listFiles($data['uploaddir'], $data['ignores']);
 
-	// Removing old files
-	if ($settings['remove_old_files'])
-		removeOldFiles($data['uploaddir']);
+		// Removing old files
+		if ($settings['remove_old_files'])
+			removeOldFiles($data['uploaddir']);
 
-	$file_array = listFiles($data['uploaddir'], $data['ignores']);
-	//die(print_r($file_array, TRUE));
+		$file_array = listFiles($data['uploaddir'], $data['ignores']);
+	}
 ?>
 <!DOCTYPE html>
 <html lang="<?=$settings['lang']?>" dir="<?=$settings['lang_dir']?>">
