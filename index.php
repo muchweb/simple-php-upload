@@ -214,26 +214,30 @@
 	if (isset($_POST)) {
 		if ($settings['allow_deletion'])
 			if (isset($_POST['action']) && $_POST['action'] === 'delete')
-				if (in_array(substr($_POST['target'], 1), $_SESSION['upload_user_files']) || in_array($_POST['target'], $_SESSION['upload_user_files']))
-					if (file_exists($_POST['target'])) {
-						unlink($_POST['target']);
+				if (in_array(substr($_POST['target'], 1), $_SESSION['upload_user_files']) || in_array($_POST['target'], $_SESSION['upload_user_files'])) {
+					$fqfn = $data['uploaddir'] . DIRECTORY_SEPARATOR . $_POST['target'];
+					if (file_exists($fqfn)) {
+						unlink($fqfn);
 						echo 'File has been removed';
 						exit;
 					}
+				}
 
 		if ($settings['allow_private'])
 			if (isset($_POST['action']) && $_POST['action'] === 'privatetoggle')
-				if (in_array(substr($_POST['target'], 1), $_SESSION['upload_user_files']) || in_array($_POST['target'], $_SESSION['upload_user_files']))
-					if (file_exists($_POST['target'])) {
+				if (in_array(substr($_POST['target'], 1), $_SESSION['upload_user_files']) || in_array($_POST['target'], $_SESSION['upload_user_files'])) {
+					$fqfn = $data['uploaddir'] . DIRECTORY_SEPARATOR . $_POST['target'];
+					if (file_exists($fqfn)) {
 						if ($_POST['target'][0] === '.') {
-							rename($_POST['target'], substr($_POST['target'], 1));
+							rename($fqfn, substr($fqfn, 1));
 							echo 'File has been made visible';
 						} else {
-							rename($_POST['target'], '.' . $_POST['target']);
+							rename($fqfn, $data['uploaddir'] . DIRECTORY_SEPARATOR . '.' . $_POST['target']);
 							echo 'File has been hidden';
 						}
 						exit;
 					}
+				}
 	}
 
 	// List files in a given directory, excluding certain files
