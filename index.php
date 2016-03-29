@@ -106,7 +106,7 @@
 
 		// 'User ID'
 		if (!isset($_SESSION['upload_user_id']))
-			$_SESSION['upload_user_id'] = rand(100000, 999999);
+			$_SESSION['upload_user_id'] = mt_rand(100000, 999999);
 
 		// List of filenames that were uploaded by this user
 		if (!isset($_SESSION['upload_user_files']))
@@ -171,7 +171,7 @@
 			do {
 				$file_data['target_file_name'] = '';
 				while (strlen($file_data['target_file_name']) < $settings['random_name_len'])
-					$file_data['target_file_name'] .= $settings['random_name_alphabet'][rand(0, strlen($settings['random_name_alphabet']) - 1)];
+					$file_data['target_file_name'] .= $settings['random_name_alphabet'][mt_rand(0, strlen($settings['random_name_alphabet']) - 1)];
 				if ($settings['random_name_keep_type'])
 					$file_data['target_file_name'] .= '.' . pathinfo($file_data['uploaded_file_name'], PATHINFO_EXTENSION);
 			} while (file_exists($file_data['target_file_name']));
