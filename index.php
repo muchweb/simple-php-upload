@@ -75,7 +75,7 @@
 	// =============={ Configuration End }==============
 
 	// Is the local config file there?
-	if (file_exists('config-local.php')) {
+	if (isReadableFile('config-local.php')) {
 		// Load it then
 		include('config-local.php');
 	}
@@ -175,12 +175,12 @@
 					$file_data['target_file_name'] .= $settings['random_name_alphabet'][mt_rand(0, strlen($settings['random_name_alphabet']) - 1)];
 				if ($settings['random_name_keep_type'])
 					$file_data['target_file_name'] .= '.' . pathinfo($file_data['uploaded_file_name'], PATHINFO_EXTENSION);
-			} while (file_exists($file_data['target_file_name']));
+			} while (isReadableFile($file_data['target_file_name']));
 		}
 		$file_data['upload_target_file'] = $data['uploaddir'] . DIRECTORY_SEPARATOR . $file_data['target_file_name'];
 
 		// Do now allow to overwriting files
-		if (file_exists($file_data['upload_target_file'])) {
+		if (isReadableFile($file_data['upload_target_file'])) {
 			echo 'File name already exists' . "\n";
 			return;
 		}
@@ -201,7 +201,7 @@
 
 		if (in_array(substr($file, 1), $_SESSION['upload_user_files']) || in_array($file, $_SESSION['upload_user_files'])) {
 			$fqfn = $data['uploaddir'] . DIRECTORY_SEPARATOR . $file;
-			if (!in_array($file, $data['ignores']) && file_exists($fqfn)) {
+			if (!in_array($file, $data['ignores']) && isReadableFile($fqfn)) {
 				unlink($fqfn);
 				echo 'File has been removed';
 				exit;
@@ -215,7 +215,7 @@
 
 		if (in_array(substr($file, 1), $_SESSION['upload_user_files']) || in_array($file, $_SESSION['upload_user_files'])) {
 			$fqfn = $data['uploaddir'] . DIRECTORY_SEPARATOR . $file;
-			if (!in_array($file, $data['ignores']) && file_exists($fqfn)) {
+			if (!in_array($file, $data['ignores']) && isReadableFile($fqfn)) {
 				if (substr($file, 0, 1) === '.') {
 					rename($fqfn, substr($fqfn, 1));
 					echo 'File has been made visible';
@@ -226,6 +226,11 @@
 				exit;
 			}
 		}
+	}
+
+	// Checks if the given file is a file and is readable
+	function isReadableFile ($file) {
+		return (is_file($file) && is_readable($file));
 	}
 
 	// Files are being POSEed. Uploading them one by one.
@@ -257,7 +262,7 @@
 		$dh = opendir($dir);
 			while ($filename = readdir($dh)) {
 				$fqfn = $dir . DIRECTORY_SEPARATOR . $filename;
-				if (is_file($fqfn) && !in_array($filename, $data['ignores']))
+				if (isReadableFile($fqfn) && !in_array($filename, $data['ignores']))
 					$file_array[filemtime($fqfn)] = $filename;
 			}
 
