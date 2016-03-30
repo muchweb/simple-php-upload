@@ -20,6 +20,9 @@
 		// Website title
 		'title' => 'strace.club',
 
+		// Description for this website
+		'description' => '',
+
 		// Base path (auto-detection)
 		'base_path' => dirname(__FILE__) . DIRECTORY_SEPARATOR,
 
@@ -425,6 +428,7 @@
 	</head>
 	<body>
 		<h1><?=$settings['title']?></h1>
+		<p><?=$settings['description']?></p>
 		<form action="<?= $data['scriptname'] ?>" method="post" enctype="multipart/form-data" class="dropzone" id="simpleupload-form">
 			Maximum upload size: <?php echo $data['max_upload_size']; ?><br />
 			<input type="file" name="file[]" id="simpleupload-input" />
