@@ -245,10 +245,11 @@
 		header('Content-type: text/plain');
 		if (is_array($_FILES['file'])) {
 			$file_array = diverseArray($_FILES['file']);
-			foreach ($file_array as $file_data)
-				uploadFile($file_data);
+			foreach ($file_array as $file_data) {
+				$targetFile = uploadFile($file_data);
+			}
 		} else {
-			uploadFile($_FILES['file']);
+			$targetFile = uploadFile($_FILES['file']);
 		}
 		exit;
 	}
