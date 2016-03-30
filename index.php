@@ -185,7 +185,7 @@
 		// Do now allow to overwriting files
 		if (isReadableFile($file_data['upload_target_file'])) {
 			echo 'File name already exists' . "\n";
-			return;
+			return false;
 		}
 
 		// Moving uploaded file OK
@@ -193,8 +193,12 @@
 			if ($settings['allow_deletion'] || $settings['allow_private'])
 				$_SESSION['upload_user_files'][] = $file_data['target_file_name'];
 			echo $settings['url'] .  $file_data['target_file_name'] . "\n";
+
+			// Return target file name for later handling
+			return $file_data['upload_target_file'];
 		} else {
 			echo 'Error: unable to upload the file.';
+			return false;
 		}
 	}
 
