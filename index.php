@@ -193,7 +193,7 @@
 
 		// Moving uploaded file OK
 		if (move_uploaded_file($file_data['tmp_name'], $file_data['upload_target_file'])) {
-			if ($settings['allow_deletion'] || $settings['allow_private'])
+			if ($settings['listfiles'] && ($settings['allow_deletion'] || $settings['allow_private']))
 				$_SESSION['upload_user_files'][] = $file_data['target_file_name'];
 			echo $settings['url'] .  $file_data['target_file_name'] . "\n";
 
