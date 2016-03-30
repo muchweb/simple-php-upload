@@ -1,0 +1,5 @@
+<?php
+// Local configuration file
+$settings['some_foo'] = 'FOO';
+
+// Copy to config-local.php (not rename) and make your changes
