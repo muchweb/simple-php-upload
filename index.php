@@ -243,8 +243,9 @@
 			$file_array = diverseArray($_FILES['file']);
 			foreach ($file_array as $file_data)
 				uploadFile($file_data);
-		} else
+		} else {
 			uploadFile($_FILES['file']);
+		}
 		exit;
 	}
 
@@ -262,15 +263,19 @@
 		global $data;
 
 		$file_array = array();
+
 		$dh = opendir($dir);
-			while ($filename = readdir($dh)) {
-				$fqfn = $dir . DIRECTORY_SEPARATOR . $filename;
-				if (isReadableFile($fqfn) && !in_array($filename, $data['ignores']))
-					$file_array[filemtime($fqfn)] = $filename;
-			}
+
+		while ($filename = readdir($dh)) {
+			$fqfn = $dir . DIRECTORY_SEPARATOR . $filename;
+			if (isReadableFile($fqfn) && !in_array($filename, $data['ignores']))
+				$file_array[filemtime($fqfn)] = $filename;
+		}
 
 		ksort($file_array);
+
 		$file_array = array_reverse($file_array, true);
+
 		return $file_array;
 	}
 
