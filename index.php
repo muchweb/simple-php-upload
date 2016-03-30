@@ -20,7 +20,10 @@
 		// Website title
 		'title' => 'strace.club',
 
-		// Directory to store uploaded files
+		// Base path (auto-detection)
+		'base_path' => dirname(__FILE__) . DIRECTORY_SEPARATOR,
+
+		// Directory to store uploaded files (relative to base_path)
 		'uploaddir' => '.',
 
 		// Display list uploaded files
@@ -100,7 +103,7 @@
 	$data['ignores'][] = basename($data['scriptname']);
 
 	// Use canonized path
-	$data['uploaddir'] = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . $settings['uploaddir']);
+	$data['uploaddir'] = realpath($settings['base_path'] . $settings['uploaddir']);
 
 	// Maximum upload size, set by system
 	$data['max_upload_size'] = ini_get('upload_max_filesize');
