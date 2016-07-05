@@ -87,14 +87,14 @@
 	if (isReadableFile('config-local.php')) {
 		// Load it then
 		include('config-local.php');
-	}
+	}// END - if
 
 	// Enabling error reporting
 	if ($settings['debug']) {
 		error_reporting(E_ALL);
 		ini_set('display_startup_errors',1);
 		ini_set('display_errors',1);
-	}
+	} // END - if
 
 	$data = array();
 
@@ -129,13 +129,15 @@
 		session_start();
 
 		// 'User ID'
-		if (!isset($_SESSION['upload_user_id']))
+		if (!isset($_SESSION['upload_user_id'])) {
 			$_SESSION['upload_user_id'] = mt_rand(100000, 999999);
+		} //END - if
 
 		// List of filenames that were uploaded by this user
-		if (!isset($_SESSION['upload_user_files']))
+		if (!isset($_SESSION['upload_user_files'])) {
 			$_SESSION['upload_user_files'] = array();
-	}
+		} //END - if
+	} //END - if
 
 	// If debug is enabled, logging all variables
 	if ($settings['debug']) {
@@ -192,24 +194,30 @@
 		if ($settings['random_name_len'] !== false) {
 			do {
 				$file_data['target_file_name'] = '';
-				while (strlen($file_data['target_file_name']) < $settings['random_name_len'])
+				while (strlen($file_data['target_file_name']) < $settings['random_name_len']) {
 					$file_data['target_file_name'] .= $settings['random_name_alphabet'][mt_rand(0, strlen($settings['random_name_alphabet']) - 1)];
-				if ($settings['random_name_keep_type'])
+				} //END - if
+
+				if ($settings['random_name_keep_type']) {
 					$file_data['target_file_name'] .= '.' . pathinfo($file_data['uploaded_file_name'], PATHINFO_EXTENSION);
+				} //END - if
 			} while (isReadableFile($file_data['target_file_name']));
-		}
+		} //END - if
+
 		$file_data['upload_target_file'] = $data['uploaddir'] . DIRECTORY_SEPARATOR . $file_data['target_file_name'];
 
 		// Do now allow to overwriting files
 		if (isReadableFile($file_data['upload_target_file'])) {
 			echo 'File name already exists' . "\n";
 			return false;
-		}
+		} //END - if
 
 		// Moving uploaded file OK
 		if (move_uploaded_file($file_data['tmp_name'], $file_data['upload_target_file'])) {
-			if ($settings['listfiles'] && ($settings['allow_deletion'] || $settings['allow_private']))
+			if ($settings['listfiles'] && ($settings['allow_deletion'] || $settings['allow_private'])) {
 				$_SESSION['upload_user_files'][] = $file_data['target_file_name'];
+			} //END - if
+
 			echo $settings['url'] .  $file_data['target_file_name'] . "\n";
 
 			// Return target file name for later handling
@@ -230,8 +238,8 @@
 				unlink($fqfn);
 				echo 'File has been removed';
 				exit;
-			}
-		}
+			} //END - if
+		} //END - if
 	}
 
 	// Mark/unmark file as hidden
@@ -249,8 +257,8 @@
 					echo 'File has been hidden';
 				}
 				exit;
-			}
-		}
+			} //END - if
+		} //END - if
 	}
 
 	// Checks if the given file is a file and is readable
@@ -265,21 +273,23 @@
 			$file_array = diverseArray($_FILES['file']);
 			foreach ($file_array as $file_data) {
 				$targetFile = uploadFile($file_data);
-			}
+			} //END - foreach
 		} else {
 			$targetFile = uploadFile($_FILES['file']);
 		}
 		exit;
-	}
+	} //END - if
 
 	// Other file functions (delete, private).
 	if (isset($_POST)) {
-		if ($settings['allow_deletion'] && (isset($_POST['target'])) && isset($_POST['action']) && $_POST['action'] === 'delete')
+		if ($settings['allow_deletion'] && (isset($_POST['target'])) && isset($_POST['action']) && $_POST['action'] === 'delete') {
 			deleteFile($_POST['target']);
+		} //END - if
 
-		if ($settings['allow_private'] && (isset($_POST['target'])) && isset($_POST['action']) && $_POST['action'] === 'privatetoggle')
+		if ($settings['allow_private'] && (isset($_POST['target'])) && isset($_POST['action']) && $_POST['action'] === 'privatetoggle') {
 			markUnmarkHidden($_POST['target']);
-	}
+		} //END - if
+	} //END - if
 
 	// List files in a given directory, excluding certain files
 	function createArrayFromPath ($dir) {
@@ -296,9 +306,10 @@
 
 		while ($filename = readdir($dh)) {
 			$fqfn = $dir . DIRECTORY_SEPARATOR . $filename;
-			if (isReadableFile($fqfn) && !in_array($filename, $data['ignores']))
+			if (isReadableFile($fqfn) && !in_array($filename, $data['ignores'])) {
 				$file_array[filemtime($fqfn)] = $filename;
-		}
+			} //END - if
+		} //END - while
 
 		ksort($file_array);
 
@@ -313,9 +324,10 @@
 
 		foreach ($file_array as $file) {
 			$fqfn = $dir . DIRECTORY_SEPARATOR . $file;
-			if ($settings['time_limit'] < time() - filemtime($fqfn))
+			if ($settings['time_limit'] < time() - filemtime($fqfn)) {
 				unlink($fqfn);
-		}
+			} //END - if
+		} //END - foreach
 	}
 
 	// Detects server protocol (http/s)
@@ -359,8 +371,9 @@
 		$file_array = createArrayFromPath($data['uploaddir']);
 
 		// Removing old files
-		if ($settings['remove_old_files'])
+		if ($settings['remove_old_files']) {
 			removeOldFiles($data['uploaddir']);
+		} //END - if
 
 		$file_array = createArrayFromPath($data['uploaddir']);
 	}
