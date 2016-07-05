@@ -53,21 +53,21 @@
 		// Keep filetype information (if random name is activated)
 		'random_name_keep_type' => true,
 
-		// Random file name letters
-		'random_name_alphabet' => 'qazwsxedcrfvtgbyhnujmikolp1234567890',
+		// Random file name letters (no need to mix this)
+		'random_name_alphabet' => 'abcdefghijklmnopqrstuvwxyz0123456789',
 
 		// Display debugging information
 		'debug' => false,
 
 		// Complete URL to your directory (including tracing slash)
-		'url' => 'http://strace.club/',
+		'url' => detectBaseUrl(),
 
 		// Amount of seconds that each file should be stored for (0 for no limit)
 		// Default 30 days
 		'time_limit' => 60 * 60 * 24 * 30,
 
 		// Files that will be ignored
-		'ignores' => array('.', '..', 'LICENSE', 'README.md'),
+		'ignores' => array('.', '..', 'LICENSE', 'README.md', 'config-local.php', 'config-local.php-dist'),
 
 		// Language code
 		'lang' => 'en',
@@ -107,6 +107,18 @@
 
 	// Use canonized path
 	$data['uploaddir'] = realpath($settings['base_path'] . $settings['uploaddir']);
+
+	// Is the directory there?
+	if (empty($data['uploaddir'])) {
+		// Not found
+		die(sprintf('[%s:%d]: Upload directory "%s" not found.', pathinfo(__FILE__, PATHINFO_BASENAME), __LINE__, $settings['uploaddir']));
+	} elseif ((!is_dir($data['uploaddir'])) || (!is_readable($data['uploaddir']))) {
+		// Not readable
+		die(sprintf('[%s:%d]: Upload directory "%s" is not readable.', pathinfo(__FILE__, PATHINFO_BASENAME), __LINE__, $data['uploaddir']));
+	} elseif (!is_writable($data['uploaddir'])) {
+		// Not writable
+		die(sprintf('[%s:%d]: Upload directory "%s" is not writable.', pathinfo(__FILE__, PATHINFO_BASENAME), __LINE__, $data['uploaddir']));
+	}
 
 	// Maximum upload size, set by system
 	$data['max_upload_size'] = ini_get('upload_max_filesize');
@@ -273,9 +285,14 @@
 	function createArrayFromPath ($dir) {
 		global $data;
 
+		// Empty paths are not accepted
+		if (empty($dir)) {
+			die(sprintf('[%s:%d]: R.I.P.: Parameter "dir" cannot be empty.', __FUNCTION__, __LINE__));
+		} // END - if
+
 		$file_array = array();
 
-		$dh = opendir($dir);
+		$dh = opendir($dir) or die(sprintf('[%s:%d]: R.I.P.: Cannot read directory "%s".', __FUNCTION__, __LINE__, $dir));
 
 		while ($filename = readdir($dh)) {
 			$fqfn = $dir . DIRECTORY_SEPARATOR . $filename;
@@ -301,6 +318,42 @@
 		}
 	}
 
+	// Detects server protocol (http/s)
+	function detectServerProtocol () {
+		// Default is HTTP
+		$protocol = 'http';
+
+		// Are some specific fields set?
+		if (((isset($_SERVER['HTTPS'])) && (strtolower($_SERVER['HTTPS']) == 'on')) || ((isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) && (strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) == 'https'))) {
+			// Switch to HTTPS
+			$protocol = 'https';
+		} // END - if
+ 
+		// Return cached value
+		return $protocol;
+	}
+ 
+	// Detects base URL
+	function detectBaseUrl () {
+		// First protcol, default is HTTP
+		$protocol = detectServerProtocol();
+
+		// Default is from server
+		$port = getenv('SERVER_PORT');
+
+		// Some other port number than defaults?
+		if ((($port == 80) && ($protocol == 'http')) || (($port == 443) && ($protocol == 'https'))) {
+			// Default port found
+			$port = '';
+		} // END - if
+
+		// Construct base URL
+		$baseUrl = sprintf('%s://%s%s%s', $protocol, getenv('SERVER_NAME'), $port, dirname(getenv('SCRIPT_NAME')));
+
+		// Return it
+		return $baseUrl;
+	}
+
 	// Only read files if the feature is enabled
 	if ($settings['listfiles']) {
 		$file_array = createArrayFromPath($data['uploaddir']);
@@ -318,7 +371,7 @@
 		<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 		<meta http-equiv="content-style-type" content="text/css" />
 		<meta http-equiv="content-script-type" content="text/javascript" />
-		<meta http-equiv="language" content="de" />
+		<meta http-equiv="language" content="<?=$settings['lang']?>" />
 
 		<meta name="robots" content="noindex" />
 		<meta name="referrer" content="origin-when-crossorigin" />
