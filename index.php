@@ -426,7 +426,7 @@
 				padding: 0;
 			}
 
-			body > ul > li > a {
+			body > ul > li > a.uploaded_file {
 				display: block;
 				margin: 0 0 1px 0;
 				list-style: none;
@@ -533,7 +533,7 @@
 							// Create full-qualified URL and clean it a bit
 							$url = str_replace('/./', '/', sprintf('%s%s/%s', $settings['url'], $settings['uploaddir'], $filename));
 
-							echo "<a href=\"$url\" target=\"_blank\">$filename<span>$file_info</span></a>";
+							echo "<a class=\"uploaded_file\" href=\"$url\" target=\"_blank\">$filename<span>$file_info</span></a>";
 
 							if ($file_owner) {
 								if ($settings['allow_deletion'])
