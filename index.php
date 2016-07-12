@@ -163,7 +163,7 @@
 
 	// Format file size
 	function formatSize ($bytes) {
-		$units = array('B', 'KB', 'MB', 'GB', 'TB');
+		$units = array('B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
 
 		$bytes = max($bytes, 0);
 		$pow = floor(($bytes ? log($bytes) : 0) / log(1024));
