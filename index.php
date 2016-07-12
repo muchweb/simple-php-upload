@@ -143,22 +143,16 @@
 	if ($settings['debug']) {
 		// Displaying debug information
 		echo '<h2>Settings:</h2>';
-		echo '<pre>';
-		print_r($settings);
-		echo '</pre>';
+		echo '<pre>' . print_r($settings, true) . '</pre>';
 
 		// Displaying debug information
 		echo '<h2>Data:</h2>';
-		echo '<pre>';
-		print_r($data);
-		echo '</pre>';
+		echo '<pre>' . print_r($data, true) .  '</pre>';
 		echo '</pre>';
 
 		// Displaying debug information
 		echo '<h2>SESSION:</h2>';
-		echo '<pre>';
-		print_r($_SESSION);
-		echo '</pre>';
+		echo '<pre>' . print_r($_SESSION, true) . '</pre>';
 	}
 
 	// Format file size
