@@ -493,7 +493,7 @@
 			Maximum upload size: <?php echo $data['max_upload_size']; ?><br />
 			<input type="file" name="file[]" id="simpleupload-input" />
 		</form>
-		<?php if ($settings['listfiles']) { ?>
+		<?php if (($settings['listfiles']) && (count($file_array) > 0)) { ?>
 			<ul id="simpleupload-ul">
 				<?php
 					foreach ($file_array as $mtime => $filename) {
