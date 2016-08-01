@@ -17,102 +17,117 @@
 	// =============={ Configuration Begin }==============
 	$settings = array(
 
-		// Website title
+		// Website title. Displayed of top of the page.
 		'title' => 'strace.club',
 
 		// Description for this website
-		'description' => '',
+		'description' => 'This is libre file hosting. Code is available <a href="https://github.com/muchweb/simple-php-upload">on Github</a>.',
 
-		// Base path (auto-detection)
+		// Upload directory. Could be absolute or relative.
+		// Default: auto-detection
 		'base_path' => dirname(__FILE__) . DIRECTORY_SEPARATOR,
 
-		// Directory to store uploaded files (relative to base_path)
-		'uploaddir' => '.',
-
 		// Display list uploaded files
+		// Default: true
 		'listfiles' => true,
 
 		// Allow users to delete files that they have uploaded (will enable sessions)
+		// Default: true
 		'allow_deletion' => true,
 
 		// Allow users to mark files as hidden
+		// Default: true
 		'allow_private' => true,
 
 		// Display file sizes
+		// Default: true
 		'listfiles_size' => true,
 
 		// Display file dates
+		// Default: true
 		'listfiles_date' => true,
 
 		// Display file dates format
+		// Default: 'F d Y H:i:s'
 		'listfiles_date_format' => 'F d Y H:i:s',
 
-		// Randomize file names (number of 'false')
+		// Randomize file names. Number for file name lenght or false to disable.
+		// Default: 8
 		'random_name_len' => 8,
 
-		// Keep filetype information (if random name is activated)
+		// Keep filetype (file extension) information (if random name is activated).
+		// Default: true
 		'random_name_keep_type' => true,
 
-		// Random file name letters (no need to mix this)
+		// Letters that are used for random file name generation (alphabet).
+		// Default: 'abcdefghijklmnopqrstuvwxyz0123456789'
 		'random_name_alphabet' => 'abcdefghijklmnopqrstuvwxyz0123456789',
 
 		// Display debugging information
+		// Default: false
 		'debug' => false,
 
-		// Complete URL to your directory (including tracing slash)
-		'url' => detectBaseUrl(),
+		// Complete URL to your directory with trailing slash (!)
+		// Default: autoDetectBaseUrl()
+		'url' => 'http://localhost:8000/',
 
 		// Amount of seconds that each file should be stored for (0 for no limit)
-		// Default 30 days
+		// Default: 30 days (60 * 60 * 24 * 30)
 		'time_limit' => 60 * 60 * 24 * 30,
 
 		// Files that will be ignored
-		'ignores' => array('.', '..', 'LICENSE', 'README.md', 'config-local.php', 'config-local.php-dist'),
+		'ignores' => array(
+			'.',
+			'..',
+			'LICENSE',
+			'README.md',
+			basename($_SERVER['PHP_SELF']),
+			'config.php',
+		),
 
 		// Language code
+		// Default: 'en'
 		'lang' => 'en',
 
 		// Language direction
+		// Default: 'ltr'
 		'lang_dir' => 'ltr',
 
-		// Remove old files?
-		'remove_old_files' => true,
-
 		// Privacy: Allow external references (the "fork me" ribbon)
-		'allow_external_refs' => true,
+		// Default: true
+		'ribbon_enable' => true,
 	);
 	// =============={ Configuration End }==============
 
-	// Is the local config file there?
-	if (isReadableFile('config-local.php')) {
-		// Load it then
-		include('config-local.php');
-	}// END - if
+	// Load local config file if it exists.
+	if (isReadableFile('config.php')) include('config.php');
 
 	// Enabling error reporting
 	if ($settings['debug']) {
 		error_reporting(E_ALL);
-		ini_set('display_startup_errors',1);
-		ini_set('display_errors',1);
-	} // END - if
+		ini_set('display_startup_errors', 1);
+		ini_set('display_errors', 1);
+	}
 
+	// Generated settings file.
 	$data = array();
 
-	// Name of this file
-	$data['scriptname'] = $settings['url'] . '/' . pathinfo(__FILE__, PATHINFO_BASENAME);
+	$data['description'] = '';
+	if (strlen($settings['description']) > 0)
+		$data['description'] = $settings['description'] . '<br><br>';
 
 	// Adding current script name to ignore list
 	$data['ignores'] = $settings['ignores'];
-	$data['ignores'][] = basename($data['scriptname']);
+	$data['ignores'][] = basename('index.php');
 
 	// Use canonized path
-	$data['uploaddir'] = realpath($settings['base_path'] . $settings['uploaddir']);
+	$data['uploaddir'] = realpath($settings['base_path']);
 
 	// Is the directory there?
-	if (empty($data['uploaddir'])) {
+	if (!is_dir($data['uploaddir'])) {
 		// Not found
-		die(sprintf('[%s:%d]: Upload directory "%s" not found.', pathinfo(__FILE__, PATHINFO_BASENAME), __LINE__, $settings['uploaddir']));
-	} elseif ((!is_dir($data['uploaddir'])) || (!is_readable($data['uploaddir']))) {
+		die(sprintf('[%s:%d]: Upload path "%s" is not a directory.', pathinfo(__FILE__, PATHINFO_BASENAME), __LINE__, $data['uploaddir']));
+	} elseif (!is_readable($data['uploaddir'])) {
 		// Not readable
 		die(sprintf('[%s:%d]: Upload directory "%s" is not readable.', pathinfo(__FILE__, PATHINFO_BASENAME), __LINE__, $data['uploaddir']));
 	} elseif (!is_writable($data['uploaddir'])) {
@@ -120,7 +135,7 @@
 		die(sprintf('[%s:%d]: Upload directory "%s" is not writable.', pathinfo(__FILE__, PATHINFO_BASENAME), __LINE__, $data['uploaddir']));
 	}
 
-	// Maximum upload size, set by system
+	// Detect maximum upload size, allowed by server
 	$data['max_upload_size'] = ini_get('upload_max_filesize');
 
 	// If file deletion or private files are allowed, starting a session.
@@ -128,16 +143,14 @@
 	if ($settings['allow_deletion'] || $settings['allow_private']) {
 		session_start();
 
-		// 'User ID'
-		if (!isset($_SESSION['upload_user_id'])) {
+		// Genereate random 'user id'
+		if (!isset($_SESSION['upload_user_id']))
 			$_SESSION['upload_user_id'] = mt_rand(100000, 999999);
-		} //END - if
 
-		// List of filenames that were uploaded by this user
-		if (!isset($_SESSION['upload_user_files'])) {
+		// Store list of files that were uploaded by this user
+		if (!isset($_SESSION['upload_user_files']))
 			$_SESSION['upload_user_files'] = array();
-		} //END - if
-	} //END - if
+	}
 
 	// If debug is enabled, logging all variables
 	if ($settings['debug']) {
@@ -148,7 +161,6 @@
 		// Displaying debug information
 		echo '<h2>Data:</h2>';
 		echo '<pre>' . print_r($data, true) .  '</pre>';
-		echo '</pre>';
 
 		// Displaying debug information
 		echo '<h2>SESSION:</h2>';
@@ -168,7 +180,7 @@
 		return ceil($bytes) . ' ' . $units[$pow];
 	}
 
-	// Rotating a two-dimensional array
+	// Rotate a two-dimensional array. Used for file uploads
 	function diverseArray ($vector) {
 		$result = array();
 		foreach ($vector as $key1 => $value1)
@@ -190,13 +202,13 @@
 				$file_data['target_file_name'] = '';
 				while (strlen($file_data['target_file_name']) < $settings['random_name_len']) {
 					$file_data['target_file_name'] .= $settings['random_name_alphabet'][mt_rand(0, strlen($settings['random_name_alphabet']) - 1)];
-				} //END - if
+				}
 
 				if ($settings['random_name_keep_type']) {
 					$file_data['target_file_name'] .= '.' . pathinfo($file_data['uploaded_file_name'], PATHINFO_EXTENSION);
-				} //END - if
+				}
 			} while (isReadableFile($file_data['target_file_name']));
-		} //END - if
+		}
 
 		$file_data['upload_target_file'] = $data['uploaddir'] . DIRECTORY_SEPARATOR . $file_data['target_file_name'];
 
@@ -204,13 +216,13 @@
 		if (isReadableFile($file_data['upload_target_file'])) {
 			echo 'File name already exists' . "\n";
 			return false;
-		} //END - if
+		}
 
 		// Moving uploaded file OK
 		if (move_uploaded_file($file_data['tmp_name'], $file_data['upload_target_file'])) {
 			if ($settings['listfiles'] && ($settings['allow_deletion'] || $settings['allow_private'])) {
 				$_SESSION['upload_user_files'][] = $file_data['target_file_name'];
-			} //END - if
+			}
 
 			echo $settings['url'] .  $file_data['target_file_name'] . "\n";
 
@@ -232,8 +244,8 @@
 				unlink($fqfn);
 				echo 'File has been removed';
 				exit;
-			} //END - if
-		} //END - if
+			}
+		}
 	}
 
 	// Mark/unmark file as hidden
@@ -251,8 +263,8 @@
 					echo 'File has been hidden';
 				}
 				exit;
-			} //END - if
-		} //END - if
+			}
+		}
 	}
 
 	// Checks if the given file is a file and is readable
@@ -272,18 +284,18 @@
 			$targetFile = uploadFile($_FILES['file']);
 		}
 		exit;
-	} //END - if
+	}
 
 	// Other file functions (delete, private).
 	if (isset($_POST)) {
 		if ($settings['allow_deletion'] && (isset($_POST['target'])) && isset($_POST['action']) && $_POST['action'] === 'delete') {
 			deleteFile($_POST['target']);
-		} //END - if
+		}
 
 		if ($settings['allow_private'] && (isset($_POST['target'])) && isset($_POST['action']) && $_POST['action'] === 'privatetoggle') {
 			markUnmarkHidden($_POST['target']);
-		} //END - if
-	} //END - if
+		}
+	}
 
 	// List files in a given directory, excluding certain files
 	function createArrayFromPath ($dir) {
@@ -302,7 +314,7 @@
 			$fqfn = $dir . DIRECTORY_SEPARATOR . $filename;
 			if (isReadableFile($fqfn) && !in_array($filename, $data['ignores'])) {
 				$file_array[filemtime($fqfn)] = $filename;
-			} //END - if
+			}
 		} //END - while
 
 		ksort($file_array);
@@ -320,44 +332,40 @@
 			$fqfn = $dir . DIRECTORY_SEPARATOR . $file;
 			if ($settings['time_limit'] < time() - filemtime($fqfn)) {
 				unlink($fqfn);
-			} //END - if
+			}
 		} //END - foreach
 	}
 
-	// Detects server protocol (http/s)
-	function detectServerProtocol () {
-		// Default is HTTP
-		$protocol = 'http';
-
-		// Are some specific fields set?
-		if (((isset($_SERVER['HTTPS'])) && (strtolower($_SERVER['HTTPS']) == 'on')) || ((isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) && (strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) == 'https'))) {
-			// Switch to HTTPS
-			$protocol = 'https';
-		} // END - if
- 
-		// Return cached value
-		return $protocol;
-	}
- 
 	// Detects base URL
-	function detectBaseUrl () {
-		// First protcol, default is HTTP
-		$protocol = detectServerProtocol();
+	function autoDetectBaseUrl () {
+		// Detect protocol
+		$protocol = 'http';
+		if (
+			((isset($_SERVER['HTTPS'])) && (strtolower($_SERVER['HTTPS']) == 'on')) ||
+			((isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) && (strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) == 'https'))
+		) $protocol = 'https';
 
-		// Default is from server
+		// Detect port
 		$port = getenv('SERVER_PORT');
+		if (
+			(($port == 80) && ($protocol == 'http')) ||
+			(($port == 443) && ($protocol == 'https'))
+		) $port = '';
 
-		// Some other port number than defaults?
-		if ((($port == 80) && ($protocol == 'http')) || (($port == 443) && ($protocol == 'https'))) {
-			// Default port found
-			$port = '';
-		} // END - if
+		// Detect server name
+		$server_name = getenv('SERVER_NAME');
+		if ($server_name === false) $server_name = 'localhost';
 
 		// Construct base URL
-		$baseUrl = sprintf('%s://%s%s%s', $protocol, getenv('SERVER_NAME'), $port, dirname(getenv('SCRIPT_NAME')));
+		$base_url = sprintf(
+			'%s://%s%s%s',
+			$protocol,
+			$server_name,
+			$port,
+			dirname(getenv('SCRIPT_NAME'))
+		);
 
-		// Return it
-		return $baseUrl;
+		return $base_url;
 	}
 
 	// Only read files if the feature is enabled
@@ -365,9 +373,8 @@
 		$file_array = createArrayFromPath($data['uploaddir']);
 
 		// Removing old files
-		if ($settings['remove_old_files']) {
+		if ($settings['time_limit'] > 0)
 			removeOldFiles($data['uploaddir']);
-		} //END - if
 
 		$file_array = createArrayFromPath($data['uploaddir']);
 	}
@@ -488,9 +495,9 @@
 	</head>
 	<body>
 		<h1><?=$settings['title']?></h1>
-		<p><?=$settings['description']?></p>
-		<form action="<?= $data['scriptname'] ?>" method="post" enctype="multipart/form-data" class="dropzone" id="simpleupload-form">
-			Maximum upload size: <?php echo $data['max_upload_size']; ?><br />
+		<form action="<?= $settings['url'] ?>" method="post" enctype="multipart/form-data" class="dropzone" id="simpleupload-form">
+			<?=$data['description']?>
+			Choose a file or Drag&amp;Drop. Maximum upload size is <?php echo $data['max_upload_size']; ?>.<br /><br />
 			<input type="file" name="file[]" id="simpleupload-input" />
 		</form>
 		<?php if (($settings['listfiles']) && (count($file_array) > 0)) { ?>
@@ -525,19 +532,19 @@
 							echo "<li class=\"' . $class . '\">";
 
 							// Create full-qualified URL and clean it a bit
-							$url = str_replace('/./', '/', sprintf('%s%s/%s', $settings['url'], $settings['uploaddir'], $filename));
+							$url = str_replace('/./', '/', sprintf('%s%s/%s', $settings['url'], $data['uploaddir'], $filename));
 
 							echo "<a class=\"uploaded_file\" href=\"$url\" target=\"_blank\">$filename<span>$file_info</span></a>";
 
 							if ($file_owner) {
 								if ($settings['allow_deletion'])
-									echo '<form action="' . $data['scriptname'] . '" method="post"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="delete" /><button type="submit">delete</button></form>';
+									echo '<form action="' . $settings['url'] . '" method="post"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="delete" /><button type="submit">delete</button></form>';
 
 								if ($settings['allow_private'])
 									if ($file_private)
-										echo '<form action="' . $data['scriptname'] . '" method="post"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="privatetoggle" /><button type="submit">make public</button></form>';
+										echo '<form action="' . $settings['url'] . '" method="post"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="privatetoggle" /><button type="submit">make public</button></form>';
 									else
-										echo '<form action="' . $data['scriptname'] . '" method="post"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="privatetoggle" /><button type="submit">make private</button></form>';
+										echo '<form action="' . $settings['url'] . '" method="post"><input type="hidden" name="target" value="' . $filename . '" /><input type="hidden" name="action" value="privatetoggle" /><button type="submit">make private</button></form>';
 							}
 
 							echo "</li>";
@@ -548,19 +555,16 @@
 		<?php
 		}
 
-		if ($settings['allow_external_refs']) {
+		if ($settings['ribbon_enable']) {
 		?>
 			<a href="https://github.com/muchweb/simple-php-upload" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
 		<?php
-		} else {
-		?>
-			<a href="https://github.com/muchweb/simple-php-upload" target="_blank">Fork me on GitHub</a>
-		<?php
 		}
 		?>
+
 		<script type="text/javascript">
 		<!--
-			// Init some variales to shorten code
+			// Init some variables to shorten code
 			var target_form        = document.getElementById('simpleupload-form');
 			var target_ul          = document.getElementById('simpleupload-ul');
 			var target_input       = document.getElementById('simpleupload-input');
@@ -634,7 +638,7 @@
 					window.location.reload();
 				};
 
-				xhr.open('post', '<?php echo $data['scriptname']; ?>', true);
+				xhr.open('post', '<?php echo $settings['url']; ?>', true);
 				xhr.send(form);
 			}
 

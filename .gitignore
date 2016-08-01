@@ -1,1 +1,9 @@
-config-local.php
+# Ignore everything
+*
+
+# Except not these files:
+!.gitignore
+!.gitattributes
+!index.php
+!README.md
+!LICENSE
